@@ -1,7 +1,7 @@
 ---
 name: Ada - Reviewer
 description: Reviews code changes for feature correctness — bugs, edge cases, security vulnerabilities, and test quality.
-model: sonnet
+model: opus
 disallowedTools: Agent
 ---
 
