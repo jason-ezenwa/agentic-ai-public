@@ -7,7 +7,7 @@ description: Implements a feature based on a provided technical specification, e
 
 > All paths are relative to the skill's base directory provided when you load the skill.
 
-This skill guides you through implementing a feature defined in a Technical Specification file (usually in `docs/technical-specs/`). It mandates a strict workflow of Worktree Setup -> Analysis & Planning -> Implementation -> Build Check -> Verification -> PR Creation.
+This skill guides you through implementing a feature defined in a Technical Specification file (usually in `docs/technical-specs/`). It mandates a strict workflow of Worktree Setup -> Analysis & Planning -> Implementation -> Spot Checks -> Verification -> PR Creation.
 
 Keep your focus on getting the work done and the app compiling. Verification (code review + QA) runs once you're done — as Step 4, just before the PR — so you know it's coming, but don't divert to it until the implementation work is complete.
 
@@ -36,7 +36,7 @@ Build the list from this shape:
 - [ ] Analysis & planning — read spec; confirm Goals / Non-Goals / API Design
 - [ ] Implement shared dependencies first (DTOs, types, base components, constants)
 - [ ] Delegate parallel tasks to sub-agents
-- [ ] Build check — build + lint clean
+- [ ] Spot checks — build + lint clean
 - [ ] Verification — invoke `/sub-agent-driven-verification` (do not hand-roll or approximate)
 - [ ] PR creation
 
@@ -55,17 +55,14 @@ Once shared dependencies exist, delegate the independent streams to subagents �
 For each subagent, provide:
 - The path to the spec file so it can read the full context itself
 - The specific files/module it is responsible for — scoped so it does not overstep into another stream's files
-- The approach to follow: TDD (if it owns backend service/utility code) and Figma-to-Code (if the spec has Figma references)
+- The approach to follow: TDD (if it owns backend service/utility code) and Figma-to-Code (if the spec has Figma references). Pass the approach reference file(s) to the subagent so it can see how to go about it
 - A directive to implement the assigned stream itself — it must not delegate further or spawn its own subagents
 - A brief note on its role in the overall implementation (e.g. "you are implementing the dashboard page and its components")
 
 **Do not commit during subagent work.** Subagents implement and return results. Review their output, apply any corrections, then commit everything together after verification.
 
-### 3. Build Check
-1.  **Determine the build command**: Check `package.json` scripts first. Look for `build`, `type-check`, or `typecheck` in that order. Use the first one found. Only fall back to running `tsc` directly if none exist.
-2.  **Run it**: Execute the command found above.
-3.  **Fix Errors**: If the build fails, fix the errors immediately.
-4.  **Fix Lints**: For lint fixes, fix them manually — do not run `npm lint --fix` or similar automation. This ensures only files in the spec are touched.
+### 3. Spot Checks
+Ensure successful builds and lint checks. For lint fixes, fix them manually — do not run `npm lint --fix` or similar automation. This ensures only files in the spec are touched.
 
 ### 4. Verification (Code Review & QA)
 Before raising the PR, run the `/sub-agent-driven-verification` skill, passing it the spec. It returns the Code Review and QA reports — fold them into the PR body in Step 5.

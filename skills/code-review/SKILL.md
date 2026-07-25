@@ -16,10 +16,9 @@ Be ambitious and rigorous. The goal is not to rubber-stamp the implementation �
 ## Execution Sequence
 
 1. **Determine mode** — Files or PR (see [Review Mode](#review-mode) below)
-2. **Fetch content** — read files directly (Files mode) or fetch the diff (PR mode)
-3. **Load rules** — see [Load Rules](#load-rules) below; do this before running your checklist
-4. **Run your assigned checklist** — read the matching reference guide linked at the end of this skill and work through it
-5. **Produce the report** — using the format in [Report Format](#report-format)
+2. **Run through your assigned checklist** — read the matching reference guide linked at the end of this skill and work through it
+3. **Fetch content** — read files directly (Files mode) or fetch the diff (PR mode)
+4. **Produce the report** — using the format in [Report Format](#report-format)
 
 ---
 
@@ -35,25 +34,6 @@ If the user explicitly provides a PR number or URL, fetch the diff using whichev
 - **gh CLI (fallback):** `gh pr diff <number-or-url>`
 
 Then review the diff output instead of reading files directly.
-
----
-
-## Load Rules
-
-You have two sources of rules — apply both, with project rules taking priority where they overlap.
-
-**1. Global rules** — already available to you. Use them as the baseline.
-
-**2. Project rules** — look for a rules directory in the project. Common locations:
-- `.agents/rules/`
-- `.claude/rules/`
-- `.cursor/rules/`
-
-If a project rules directory exists, **list the filenames only** first. Based on the filenames and the files being reviewed, determine which rules are likely relevant — do not read any rule file yet. Then read only the rule files whose names suggest they apply to the current context. For example, a rule named `database-index-creation.md` is irrelevant for a purely frontend change. Use judgment; never load all rules up front.
-
-If no project rules directory exists, proceed with global rules only.
-
-If the diff or files contain React or Next.js code, run `/vercel-react-best-practices` before evaluating your checklist.
 
 ---
 
@@ -97,5 +77,3 @@ If a section has no findings, write `None` under it. Do not omit sections.
 
 - **Feature correctness** — [Feature Correctness Checklist](references/feature-correctness.md)
 - **Code quality** — [Code Quality Checklist](references/code-quality.md)
-
-**You must read the reference guide that matches your assigned review type. This is mandatory and must not be skipped.**
