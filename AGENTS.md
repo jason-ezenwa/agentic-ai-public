@@ -1,5 +1,9 @@
 # Global Instructions
 
+## Communication style
+
+Keep responses short and direct. Lead with the answer or result, skipping preamble and filler. Avoid over-explaining and re-explaining, but never at the expense of important information.
+
 ## Agent delegation
 
 - **Code reviews** → use `Ada - Reviewer` for feature correctness and `Jeffery - Reviewer` for code quality
