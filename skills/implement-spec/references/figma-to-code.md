@@ -28,7 +28,7 @@ When using the `figma-desktop` MCP and the user has NOT provided a URL, tools au
 
 ## Steps 2 & 3: Fetch Design Context + Preview (Run in Parallel)
 
-Use sub-agents to do this work concurrently — all fetching happens simultaneously before implementation begins.
+Fetch design context and screenshot concurrently — all fetching happens simultaneously before implementation begins.
 
 ### Reference storage and reuse
 
@@ -58,29 +58,21 @@ CTX="${STEM}__context.txt"
 
 ### For a single frame
 
-Run directly (no sub-agent needed):
-
 ```
 get_design_context(fileKey=":fileKey", nodeId="1-2")   # save output to context.txt (skip if cached)
 get_screenshot(fileKey=":fileKey", nodeId="1-2")       # save PNG (skip if cached)
 ```
 
-Alongside this, spawn one **codebase scan sub-agent**: give it a plain-language description of the UI being implemented and ask it to find existing components, patterns, and design tokens that are likely reusable. It returns file paths and a summary.
-
 ### For multiple frames
 
-Spawn one **sub-agent per frame** in parallel. Each sub-agent:
-1. Calls `get_design_context` for its assigned frame — returns the full context (layout, typography, colors, spacing, tokens); saves it to `context.txt` (see Reference storage and reuse), skipping the call if cached
-2. Calls `get_screenshot` for its assigned frame — saves the PNG, skipping the call if cached
-3. Returns the complete design context and any Code Connect findings
-
-Simultaneously, spawn one **codebase scan sub-agent** as above.
-
-Collect all results before proceeding to Step 5.
+For each frame, run:
+1. `get_design_context` for that frame — returns the full context (layout, typography, colors, spacing, tokens); save it to `context.txt` (see Reference storage and reuse), skipping the call if cached
+2. `get_screenshot` for that frame — save the PNG, skipping the call if cached
+3. Note the complete design context and any Code Connect findings
 
 ### Handling large design contexts
 
-**If `get_design_context` is truncated or too large** (single frame or within a sub-agent):
+**If `get_design_context` is truncated or too large** (for any frame):
 1. Run `get_metadata(fileKey=":fileKey", nodeId="1-2")` to get the high-level node map.
 2. Identify the specific child nodes needed.
 3. Fetch each child individually: `get_design_context(fileKey=":fileKey", nodeId=":childNodeId")`.

@@ -21,6 +21,7 @@ This skill guides the creation of technical specification documents using a stan
     - Expected outcomes for each scenario
 
     Ask the user to confirm, adjust, or skip the test plan. If confirmed or adjusted, add the finalised plan as a `## QA Test Plan` section in the spec (update the file/issue accordingly). If skipped, leave the section out — do not add a placeholder.
+6.  **Confirm Approval Status**: Once the spec is finalised, ask the user whether it is approved. If they approve, update the **Status** field in the spec from `Draft` to `Approved` (edit the file or issue accordingly). If it is not yet approved, leave the status as `Draft`.
 
 ## Output Modes
 
@@ -80,7 +81,7 @@ Once a spec lives as an issue, treat the **issue body as the source of truth**. 
 # Technical Spec
 
 **Title**: [Feature/Product Name] - Technical Spec
-**Author**: [Tech Lead] | **Status**: Draft/Approved/Implemented | **Date**: [YYYY-MM-DD]
+**Author**: [Author's name] | **Status**: Draft/Approved | **Date**: [YYYY-MM-DD]
 **Product Spec**: [Link]
 
 ---

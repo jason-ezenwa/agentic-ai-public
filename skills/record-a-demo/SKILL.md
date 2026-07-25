@@ -5,6 +5,8 @@ description: Records a polished, human-paced video walkthrough of an already-bui
 
 # Record a Demo
 
+> All paths are relative to the skill's base directory provided when you load the skill.
+
 This skill produces a **video** of someone using the app, going through one or
 more scenarios, the way a person would present a finished feature to an
 audience. The premise is that the work is **already done and QA'd** — you are
@@ -24,12 +26,16 @@ deliberately, as if someone is watching and following along.
    prior runs. You are actively driving the app, so **contribute back** as you
    discover things worth noting.
 
-2. **Learn how to drive the app.** Read the `quality-assurance` skill for its
-   app-driving knowledge — authentication, transport, the
-   [playwright-cli manual](quality-assurance/references/playwright-cli.md)
-   (locator/refs gotchas, input handling). Read it **for that knowledge only; do
-   not run QA** — you are not validating anything. If a test plan is your
-   scenario source, read it only for *content* (what to show), never as a how-to.
+2. **Read the authentication & transport reference.** The
+   [authentication & transport reference](references/authentication-and-transport.md)
+   defines transport selection (headless vs attached), the pre-flight check for
+   attached sessions, and every browser and API auth flow. You must read this
+   before any work. This is mandatory and must not be skipped.
+
+3. **Learn how to drive the browser.** Read the
+   [playwright-cli manual](references/playwright-cli.md) — the tool manual for
+   every browser interaction (locator/refs gotchas, input handling, storage
+   state).
 
 ---
 
@@ -62,8 +68,7 @@ script exactly what to target. Nail down: the entry URL, the auth steps, the
 exact locators, any waits or dynamic content, and the **bounding box** of any
 element you'll anchor a label to (`--raw eval "el => JSON.stringify(el.getBoundingClientRect())" <ref>`).
 Capture the working selectors and steps (the scratch pad is a good place for
-these). See the `quality-assurance` skill's
-[playwright-cli manual](quality-assurance/references/playwright-cli.md) for the
+these). See the [playwright-cli manual](references/playwright-cli.md) for the
 command set.
 
 ### 4. Author and run the recording script
@@ -363,23 +368,7 @@ pills do the narrating.
 ### Quick native capture (alternative)
 
 For a throwaway clip where authoring a script isn't worth it, drive the flow with
-recording on — no script:
-
-```bash
-SLUG=<feature-slug>; DIR=/tmp/demos/$SLUG; mkdir -p "$DIR"
-playwright-cli open
-playwright-cli resize 1280 800
-playwright-cli goto https://app.example.com/login   # navigate BEFORE recording
-playwright-cli run-code "async page => { await page.getByRole('textbox', { name: 'Email' }).waitFor(); }"   # settle off-camera so the first fill doesn't wait on-record
-playwright-cli video-start "$DIR/<scenario-slug>.webm"
-playwright-cli video-show-actions --duration=600 --position=top-right   # callout per action
-playwright-cli fill "getByRole('textbox', { name: 'Email' })" "user@example.com"
-playwright-cli fill "getByRole('textbox', { name: 'Password' })" "secret" --submit
-playwright-cli screenshot --filename="$DIR/${SLUG}__post-login.png"   # key beat
-# ... more steps, more video-chapter markers ...
-playwright-cli video-stop
-playwright-cli close
-```
+recording on — no script.
 
 Recording rolls in real time, so it captures the latency between commands and
 can't finely pace typing — fine for a rough capture, not for a sign-off demo.
@@ -455,41 +444,6 @@ static screen — the stall, not the stream's length, is the glitch.
 A stream is the ideal place for the **working→done colour pill** (see
 *Recording techniques*): show an in-progress pill anchored at the input while it
 generates, then flip it to a success pill on the completion signal.
-
-```js
-const input = await page.getByRole('textbox', { name: 'Ask Skye...' }).boundingBox();
-const working = await page.screencast.showOverlay(
-  `<div style="position:absolute;left:50%;transform:translateX(-50%);top:${input.y - 40}px;
-    padding:8px 14px;border-radius:999px;background:rgba(79,70,229,0.92);color:#fff;
-    font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,0.25);">Generating reply…</div>`);
-// ... wait for the completion signal (response text holding steady) ...
-await working.dispose();
-await page.screencast.showOverlay(
-  `<div style="position:absolute;left:50%;transform:translateX(-50%);top:${input.y - 40}px;
-    padding:8px 14px;border-radius:999px;background:rgba(16,185,129,0.92);color:#fff;
-    font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,0.25);">✓ Replied</div>`,
-  { duration: 2400 });
-```
-
-### Authentication for the recording
-
-Replicate the auth you confirmed during exploration (typically headless
-email/password — fill the role+name fields and submit). If the only working auth
-is Google SSO, you can either `playwright-cli attach` to the user's Chrome and
-record that session, or — cleaner for a headless take — capture an authenticated
-state during a headless-authenticable session and reuse it:
-
-```bash
-# once, in an authenticable session
-playwright-cli state-save /tmp/demos/<feature-slug>/auth.json
-# then record starting already-authenticated
-playwright-cli state-load /tmp/demos/<feature-slug>/auth.json
-```
-
-In a screencast script, load the state at context level instead via
-`run-code` (`page.context().storageState(...)` was captured earlier). If the
-flow genuinely can't be recorded headlessly, flag it and ask how to proceed.
-Delete `auth.json` when done — it holds tokens.
 
 ### Verifying without watching
 
