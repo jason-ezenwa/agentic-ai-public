@@ -1,6 +1,6 @@
 ---
 name: create-api-docs
-description: Generates comprehensive API documentation for REST endpoints with request/response examples, error handling, and usage notes. When an Insomnia v5 collection is present in the workspace, also mirrors the documented endpoints into that collection — driven entirely off the just-written markdown, with no duplicated authoring logic.
+description: Generates comprehensive API documentation for REST endpoints with request/response examples, error handling, and usage notes. Also guides updates to Insomnia collections when present.
 ---
 
 # Create API Documentation

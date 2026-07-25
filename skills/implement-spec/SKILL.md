@@ -1,6 +1,6 @@
 ---
 name: implement-spec
-description: Implements a feature based on a provided technical specification, ensuring the app builds and the implementation adheres to the spec. Use this when you are about to work on a task or feature and you have a spec file. Provides instructions for taking intent from implementation to PR.
+description: Implements a feature based on a provided technical specification, ensuring the app builds and the implementation adheres to the spec. Use this when you are about to work on a task or feature and you have a spec file, or when the user says "implement the spec" or "implement <spec name>". Provides instructions on the desired/preferred workflow for taking intent from implementation to PR.
 ---
 
 # Implement Spec Skill
@@ -61,18 +61,10 @@ For each subagent, provide:
 
 **Do not commit during subagent work.** Subagents implement and return results. Review their output, apply any corrections, then commit everything together after verification.
 
-#### Implementation Gate
-
-Before moving to Step 3, confirm:
-
-- [ ] If service files or utility functions were implemented: did I follow the TDD workflow? `references/tdd.md`
-- [ ] If the spec has a Figma References section: did I follow the Figma-to-Code workflow? `references/figma-to-code.md`
-
 ### 3. Build Check
-**CRITICAL**: You must ensure the application builds successfully after your changes.
 1.  **Determine the build command**: Check `package.json` scripts first. Look for `build`, `type-check`, or `typecheck` in that order. Use the first one found. Only fall back to running `tsc` directly if none exist.
 2.  **Run it**: Execute the command found above.
-3.  **Fix Errors**: If the build fails, you **MUST** fix the errors immediately. Do not proceed until the build is clean.
+3.  **Fix Errors**: If the build fails, fix the errors immediately.
 4.  **Fix Lints**: For lint fixes, fix them manually — do not run `npm lint --fix` or similar automation. This ensures only files in the spec are touched.
 
 ### 4. Verification (Code Review & QA)
