@@ -1,6 +1,6 @@
 ---
 name: sub-agent-driven-verification
-description: Workflow for verification and feedback on work done based on a spec or set of instructions. Used after a spec/ticket/task has been implemented. It orchestrates code review and QA (test plan execution and UI validation) through sub agents, applies the fixes they surface, and reports back.
+description: Workflow for verification and feedback on work done based on a spec or set of instructions, using sub agents. Use after a spec/ticket/task has been implemented, or when the user says "verify your work with sub agents".
 ---
 
 # Sub-Agent-Driven Verification
@@ -15,15 +15,15 @@ This skill runs the verification and feedback phase on work that has already bee
 ---
 
 ### 1. Code Review (The "Guardrails" Check)
-Delegate code reviews to **three sub-agents in parallel** — two for feature correctness, one for code quality. The two correctness agents each review the full change set independently — the goal is two separate opinions, not a split. Using sub-agents avoids bias from the implementing agent reviewing its own work.
+Delegate code reviews to **four sub-agents in parallel** — two for feature correctness, two for code quality. All four review the full change set independently — the goal is four separate opinions, not a split. Using sub-agents avoids bias from the implementing agent reviewing its own work.
 
-Pass all three sub-agents the list of files changed and the spec content. They return reports. Using the combined reports, ask yourself:
+Pass all four sub-agents the list of files changed and the spec content. They return reports. Using the combined reports, ask yourself:
 1.  **Completeness**: Was every endpoint defined in "API Design" implemented?
 2.  **Compliance**: Were all "Goals" met? Were all "Non-Goals" avoided?
 3.  **Quality**: Are there any linting errors or obvious bugs?
 4.  **Consistency**: Does the code match the "Proposed Architecture"?
 
-> **If you find discrepancies:** Fix them now. Do not ask the user for permission to fix bugs. Once fixes are applied, send changes back to the sub-agent that flagged them — independently. Do not send correctness fixes to the code quality reviewer or vice versa. Use the same sub-agent instance, not a new one. If issues persist after this second pass, escalate to the user rather than looping further.
+> **If you find discrepancies:** Fix them now. Do not ask the user for permission to fix bugs. Once fixes are applied, send changes back to the specific sub-agent that raised that concern — independently, and only to that one. Use the same sub-agent instance, not a new one. If issues persist after this second pass, escalate to the user rather than looping further.
 
 ### 2. QA Validation (After Clean Code Review)
 
@@ -61,20 +61,17 @@ Provide:
 
 Review each agent's report:
 - **Failures**: fix the issues in code, then send the changes back to the **same sub-agent instance** that reported them — do not spawn a new one. Send UI validation fixes back to the UI validation sub-agent; send test plan failures back to the test plan execution sub-agent. Do not cross-send between the two.
-- Once all sub-agents return a full pass, proceed to Step 3.
+- Once all QA sub-agents return a full pass, continue below.
 
-> **If fixes require a second round of code review:** only send the changed files back to the relevant code review sub-agent — not a full re-run of all agents.
+> **If any fixes were made after QA started:** once those fixes are green, send the changed files back to the relevant code-review sub-agent instance before proceeding to Step 3 — not a full re-run of all agents. If QA passed with no code changes, skip this and go straight to Step 3.
 
 ---
 
-### 3. Confirm Build & Tests
+### 3. Run Build & Test Checks
 
 Only once the code review passes and QA validation passes (or was skipped):
 
-**Run the build and tests.** If you made any fixes during review or QA, confirm they're green before reporting. Run sequentially — build first, then tests:
-- **Build**: determine the command from `package.json` scripts (`build`, `type-check`, `typecheck`, in that order; fall back to `tsc` only if none exist) and run it.
-- **Tests**: run the relevant test suite. In a monorepo, prefer a targeted run scoped to what changed.
-- Both must pass. If either fails, fix and re-run before continuing.
+Run the build and tests sequentially — build first, then tests, never in parallel. Determine the build command from `package.json`. Both must pass.
 
 ### 4. Completion
 

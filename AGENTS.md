@@ -2,7 +2,7 @@
 
 ## Communication style
 
-Keep responses short and direct. Lead with the answer or result, skipping preamble and filler. Avoid over-explaining and re-explaining, but never at the expense of important information.
+Keep responses short and direct. Lead with the answer or result.
 
 ## Agent delegation
 
