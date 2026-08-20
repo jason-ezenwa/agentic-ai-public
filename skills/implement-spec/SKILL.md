@@ -1,25 +1,25 @@
 ---
 name: implement-spec
-description: Implements a feature based on a provided technical specification, ensuring the app builds and the implementation adheres to the spec. Use this when you are about to work on a task or feature and you have a spec file, or when the user says "implement the spec" or "implement <spec name>". Provides instructions on the desired/preferred workflow for taking intent from implementation to PR.
+description: Implements a feature based on a provided technical specification, ensuring the app builds and the implementation adheres to the spec. Use this when you are about to work on a task or feature and you have a spec file, or when the user says "implement the spec" or names a spec to implement. Provides instructions on the desired/preferred workflow for taking intent from implementation to PR.
 ---
 
 # Implement Spec Skill
 
 > All paths are relative to the skill's base directory provided when you load the skill.
 
-This skill guides you through implementing a feature defined in a Technical Specification file (usually in `docs/technical-specs/`). It mandates a strict workflow of Worktree Setup -> Analysis & Planning -> Implementation -> Spot Checks -> Verification -> PR Creation.
+Take the approved technical spec through implementation, verification, and a PR.
 
-Keep your focus on getting the work done and the app compiling. Verification (code review + QA) runs once you're done — as Step 4, just before the PR — so you know it's coming, but don't divert to it until the implementation work is complete.
+Read the spec first, build what it says, stay inside its goals and non-goals, then verify the assembled work before raising the PR.
+
+Do not split your attention between building and final QA: finish the implementation, run the required checks, then verify it properly.
 
 ## Workflow
 
 ### 0. Worktree Setup
 Invoke the `/setup-worktree` skill to create an isolated worktree for this task. Follow its usage instructions.
 
-After the worktree is created, proceed to Analysis & Planning.
-
 ### 1a. Analysis & Planning
-1.  **Read the Spec**: Use the tool available to you for reading files to read the target technical specification artifact (e.g., `docs/technical-specs/feature-name.md`).
+1.  **Read the Spec**: Read the target technical specification artifact (e.g., `docs/technical-specs/feature-name.md`).
 2.  **Understand Guardrails**: Pay close attention to the "Goals", "Non-Goals", and "API Design" sections. These are your acceptance criteria.
 3.  **Determine implementation approach**:
     - **TDD** — if backend service files or utility functions are implemented. Follow [TDD guide](references/tdd.md).
@@ -48,9 +48,7 @@ Both frontend and backend work can be parallelised, as long as the streams are g
 
 Before writing any code, read the spec and identify independent work streams — frontend components/pages/hooks or backend services/modules that don't depend on each other at compile time. Each stream must live in its **own module/area whose files don't overlap another stream's** — this matters especially for the TDD workflow, so each subagent can run its own red→green loop without colliding with another's tests or sources.
 
-**Shared dependencies first**: any file that other streams will import (DTOs, types, base components, constants) must be implemented in the main session before parallel work begins.
-
-Once shared dependencies exist, delegate the independent streams to subagents — up to a maximum of 3. Do not always spin up 3; use as many as the work genuinely calls for. Parallelise only if there are 2+ independent work streams. If unsure or the spec is small, stick with sequential implementation.
+Settle the shared dependencies before sub-agents begin work when independent streams need them (this gives each stream a stable contract and avoids overlapping changes). Then delegate only work that can proceed independently, in separate areas of the codebase. Use up to three sub-agents when the work genuinely benefits from it; keep a small or tightly coupled change sequential.
 
 For each subagent, provide:
 - The path to the spec file so it can read the full context itself
@@ -64,73 +62,37 @@ For each subagent, provide:
 ### 3. Spot Checks
 Ensure successful builds and lint checks. For lint fixes, fix them manually — do not run `npm lint --fix` or similar automation. This ensures only files in the spec are touched.
 
-### 4. Verification (Code Review & QA)
-Before raising the PR, run the `/sub-agent-driven-verification` skill, passing it the spec. It returns the Code Review and QA reports — fold them into the PR body in Step 5.
+### 4. Verification
+Once implementation and spot checks are complete, run the `/sub-agent-driven-verification`
+skill against the spec. Use its Code Review and QA reports in the PR.
 
 > **Skip this step only if the caller has told you verification is handled separately** (e.g. an orchestrator that verifies after you). In that case, proceed straight to PR Creation.
 
 ---
 
 ### 5. PR Creation (After Verification Passes)
-Only once the build is clean and verification has passed (or was skipped):
+Only once the build is clean and verification has passed (or was skipped), commit and raise the PR against the base branch from Step 0.
 
-1. **Commit** following Conventional Commits format — this single commit covers your implementation and any fixes verification applied. The type must match the branch prefix:
-   ```bash
-   git add -A
-   git commit -m "<type>: <short imperative description>"
-   ```
-   Examples: `feat: add contractor onboarding flow`, `fix: correct invoice rounding logic`
+One commit covers the implementation and any fixes verification applied, in Conventional Commits format — the type must match the branch prefix.
 
-2. **Push branch**:
-   ```bash
-   git push -u origin <branch-name>
-   ```
+The PR body, omitting any section whose step was skipped:
 
-3. **Check if a PR already exists** for this branch:
-   ```bash
-   gh pr view <branch-name> --json url -q .url
-   ```
-   - **If a PR exists**: skip creation. The new commit is already on the branch and the existing PR is updated. Capture the existing PR URL.
-   - **If no PR exists**: create one using the GitHub CLI. Use the base branch detected in Step 0. The body must include the spec summary, a list of files changed, the code review and QA reports from Step 4 (omit a report if that step was skipped), and the test plan (if present in the spec):
-   ```bash
-   gh pr create \
-     --base <base-branch> \
-     --title "<type>(<optional scope>): <short description>" \
-     --body "$(cat <<'EOF'
-   ## Summary
-   <Goals from the spec>
+```markdown
+## Summary
+<Goals from the spec>
 
-   ## Changes Made
-   <Bullet list of files/modules touched>
+## Changes Made
+<Bullet list of files/modules touched>
 
-   ## Code Review Report
-   <From verification in Step 4 — findings and what was fixed>
+## Code Review Report
+<From verification in Step 4 — findings and what was fixed>
 
-   ## QA Validation
-   <From verification in Step 4, if QA ran — pass/fail per criterion, any fixes applied>
+## QA Validation
+<From verification in Step 4, if QA ran — pass/fail per criterion, any fixes applied>
 
-   ## Test Plan
-   <From the spec's verification section, if present>
-   EOF
-   )"
-   ```
-
-   Examples of PR titles: `feat(onboarding): add contractor onboarding flow`, `fix(invoice): correct invoice rounding logic`, `docs: update API usage guide`
-
-4. **Capture the PR URL** from the output.
-
-5. **Fallback**: If `gh` CLI is not available, warn the user, skip PR creation, and provide the branch name so they can open a PR manually.
+## Test Plan
+<From the spec's verification section, if present>
+```
 
 ### 6. Completion
-Only when you are **confident** that:
-1.  The code is implemented.
-2.  The app builds without errors.
-3.  The implementation matches the Spec.
-4.  Verification has passed (or was skipped because the caller handles it separately).
-5.  A PR has been raised (or the user has been notified of the branch if `gh` is unavailable).
-
-Then notify the user with:
-- A brief summary of what was implemented.
-- The **code review and QA reports** (if verification ran here).
-- The **PR URL** for them to review.
-- Which **base branch** the PR targets.
+Tell the user what was delivered, what verification found and fixed, and link the PR.

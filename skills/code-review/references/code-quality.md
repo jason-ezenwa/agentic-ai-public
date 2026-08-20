@@ -39,6 +39,7 @@ Each smell reads *what it is → how to fix*; match it against the diff.
 
 **Additional smells:**
 - **Dead Code** — unused imports or variables, unreachable branches, leftover debug statements, or commented-out code in the change. → delete it; version control remembers.
-- **Noisy Comment** — a comment that restates what the code already says, or is padded and wordy. → cut it; keep only comments that explain *why*, and keep those terse.
+- **Noisy Comment** — a comment that, read against the code beneath it, restates what that code already says, or is padded and wordy. → cut it; keep only short comments that explain *why*. If it explains *what*, fix the naming instead.
+- **Stale Comment** — a comment describing behaviour the code no longer has. → update it to match the code, or delete it; a confidently wrong comment costs more than no comment.
 - **Long Function** — a function doing too much, too large to grasp at once. → split it into smaller, focused functions.
 - **Magic Number / String** — a bare literal (number or string) with no name explaining what it means. → extract it to a named constant.
