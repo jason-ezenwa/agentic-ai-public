@@ -79,16 +79,13 @@ The PR body, omitting any section whose step was skipped:
 
 ```markdown
 ## Summary
-<Goals from the spec>
-
-## Changes Made
-<Bullet list of files/modules touched>
+<Concise description of what was achieved from the spec>
 
 ## Code Review Report
-<From verification in Step 4 — findings and what was fixed>
+<Findings and what was fixed>
 
 ## QA Validation
-<From verification in Step 4, if QA ran — pass/fail per criterion, any fixes applied>
+<If QA ran — concise report on QA and any fixes applied>
 
 ## Test Plan
 <From the spec's verification section, if present>
