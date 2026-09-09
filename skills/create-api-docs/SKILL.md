@@ -119,7 +119,7 @@ Match existing requests by **method + path** (extract the path from the `url` va
 ## [Logical Grouping] Endpoints
 
 ### [Endpoint Name]
-**Purpose**: [Clear description of what this endpoint does and when to use it.]
+**Purpose**: [Action-oriented description of what this endpoint does and when to use it.]
 
 **Authentication**: [Required | None | Optional]
 **Request**:
@@ -175,15 +175,6 @@ Content-Type: application/json
 ````
 
 ## Documentation Standards
-
-### Endpoint Structure
-Each endpoint MUST include:
-1. **Purpose**: What the endpoint does (action-oriented)
-2. **Authentication**: Required, None, or Optional with details
-3. **Request**: HTTP method and path with parameter placeholders
-4. **Response**: Status code, headers, and JSON response body
-5. **Error Responses**: All possible error codes with reasons
-6. **Notes**: Implementation details, edge cases, and important behaviors
 
 ### Grouping Strategy
 Group endpoints logically:

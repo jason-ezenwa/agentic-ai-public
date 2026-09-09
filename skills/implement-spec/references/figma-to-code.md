@@ -1,7 +1,5 @@
 # Figma to Code
 
-**Follow these steps in order. Do not skip steps.**
-
 ---
 
 ## Step 1: Get Node ID

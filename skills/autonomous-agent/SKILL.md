@@ -52,7 +52,7 @@ If there are unresolved blockers that genuinely require human input, **stop here
 
 Invoke the `/create-technical-spec` skill. The spec should reflect the decisions and understanding reached in Phase 1. Do not re-open questions that were already resolved.
 
-Save to: `docs/technical-specs/<feature-name>.md`
+It publishes the spec as a GitHub issue and reports the issue number — keep it, Phases 2-5 refer to the spec by that number.
 
 ### Step 2 — Tech lead validation
 
@@ -104,7 +104,7 @@ Only proceed to Phase 5 once verification reports a clean pass. Keep the returne
 The implementation sub-agent could not open the PR, so finalising the work means **you raise it** — now, with verified work on the branch.
 
 1. **Push the verification fixes** from Phase 4 — `git add -A && git commit -m "<type>: <fixes>" && git push`. If verification applied no fixes, the branch is already current.
-2. **Raise the PR** following `/implement-spec`'s PR Creation step for the base body — Summary, Changes Made, Code Review Report and QA Validation (from Phase 4), and Test Plan — then append the two autonomous-specific sections below.
+2. **Raise the PR** following `/implement-spec`'s PR Creation step for the base body — Summary, Code Review Report and QA Validation (from Phase 4), and Test Plan — then append the two autonomous-specific sections below.
 
 ```
 ## Decisions
@@ -123,7 +123,7 @@ If this task originated from a Jira ticket or ClickUp task, reference it explici
 
 | Artifact | Location |
 |---|---|
-| Technical spec | `docs/technical-specs/<feature-name>.md` — serves as the task's audit trail |
+| Technical spec | GitHub issue labelled `spec` — serves as the task's audit trail |
 | Implementation | Feature branch + worktree, created by the implementation sub-agent via `/implement-spec` |
 | Pull request | Implemented in Phase 3, verified in Phase 4, raised by the orchestrator in Phase 5 with verified work — body carries a summary, changes, code review and QA reports, a testing guide, and a high-level decisions summary + assumptions |
 

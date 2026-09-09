@@ -14,7 +14,7 @@ description: QA skill for browser-based UI validation and functional test plan e
 
 **You must read and follow the reference guide that matches your QA type before doing any work. This is mandatory and must not be skipped** — it defines exactly how validation is expected to be performed.
 
-For authentication and transport, read the **[authentication & transport reference](references/authentication-and-transport.md)**. It defines transport selection (headless vs attached), the pre-flight check for attached sessions, and every browser and API auth flow. You must read this before any work. This is mandatory and must not be skipped.
+For authentication and transport, read the **[authentication & transport reference](references/authentication-and-transport.md)**. It defines transport selection (headless vs attached), the pre-flight check for attached sessions, and every browser and API auth flow. Read it before any work.
 
 For any browser-driven task, also read the **[playwright-cli manual](references/playwright-cli.md)** — it is the tool manual for every browser interaction.
 
