@@ -14,6 +14,7 @@ regexes or reword the messages to fit a new codebase.
 | [`no-adr-references`](no-adr-references.js) | Comments that cite an ADR (`ADR 14`, `ADR-3`, `adr-012`, a bare `ADR`, "architecture decision record") instead of stating the constraint. |
 | [`no-optional-nullable-mismatch`](no-optional-nullable-mismatch.js) | Members that are both optional and nullable (`foo?: T \| null`). |
 | [`no-hardcoded-tailwind-colors`](no-hardcoded-tailwind-colors.js) | Tailwind color utilities that bypass the design tokens (`bg-white`, `text-black`, `bg-[#fff]`). Web only — it means nothing in a project with no JSX. |
+| [`no-inline-styles`](no-inline-styles.js) | The JSX `style` attribute, in every form. Web only. |
 
 Each rule file opens with a comment explaining why the rule exists and what it
 covers. Read it before installing the rule.
@@ -33,6 +34,7 @@ packages/eslint-rules/
     no-adr-references.js
     no-optional-nullable-mismatch.js
     no-hardcoded-tailwind-colors.js
+    no-inline-styles.js
 ```
 
 In a single-app project, `eslint-rules/` at the root is enough — skip the
@@ -70,6 +72,7 @@ effect without touching any app config.
 ```js
 import { noAdrReferences } from './no-adr-references.js'
 import { noHardcodedTailwindColors } from './no-hardcoded-tailwind-colors.js'
+import { noInlineStyles } from './no-inline-styles.js'
 import { noOptionalNullableMismatch } from './no-optional-nullable-mismatch.js'
 
 // Apps register this under the `local` namespace, so every rule here is
@@ -80,6 +83,7 @@ export const eslintPlugin = {
   rules: {
     'no-adr-references': noAdrReferences,
     'no-hardcoded-tailwind-colors': noHardcodedTailwindColors,
+    'no-inline-styles': noInlineStyles,
     'no-optional-nullable-mismatch': noOptionalNullableMismatch,
   },
 }
@@ -102,7 +106,10 @@ export const sharedRuleSet = namespaced({
 // Everything shared, plus the rules that only mean something in a JSX app.
 export const webRuleSet = {
   ...sharedRuleSet,
-  ...namespaced({ 'no-hardcoded-tailwind-colors': 'warn' }),
+  ...namespaced({
+    'no-hardcoded-tailwind-colors': 'warn',
+    'no-inline-styles': 'warn',
+  }),
 }
 ```
 
@@ -111,6 +118,7 @@ export const webRuleSet = {
 ```js
 export { noAdrReferences } from './no-adr-references.js'
 export { noHardcodedTailwindColors } from './no-hardcoded-tailwind-colors.js'
+export { noInlineStyles } from './no-inline-styles.js'
 export { noOptionalNullableMismatch } from './no-optional-nullable-mismatch.js'
 
 export { PLUGIN_NAMESPACE, eslintPlugin, sharedRuleSet, webRuleSet } from './plugin.js'
@@ -240,6 +248,11 @@ Variants each rule must be tested against:
 - `no-hardcoded-tailwind-colors` — `bg-white`, `text-black`, hex in every
   supported prefix; string, template literal, conditional, logical, array and
   object forms; each class helper; and a nested `cn(...)` reporting once.
+- `no-inline-styles` — `style` as an object literal, a variable, a member
+  expression and a call; on a DOM element and on a component; two elements in
+  one tree reporting twice. Valid: a variable named `style` passed to
+  `className`, a prop whose name merely contains "style", and the `<style>`
+  element.
 
 ## Adding a rule
 

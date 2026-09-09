@@ -19,7 +19,7 @@ Do not split your attention between building and final QA: finish the implementa
 Invoke the `/setup-worktree` skill to create an isolated worktree for this task. Follow its usage instructions.
 
 ### 1a. Analysis & Planning
-1.  **Read the Spec**: Read the target technical specification artifact (e.g., `docs/technical-specs/feature-name.md`).
+1.  **Read the Spec**: A GitHub issue (`gh issue view <num> --json body -q .body`) or a file path.
 2.  **Understand Guardrails**: Pay close attention to the "Goals", "Non-Goals", and "API Design" sections. These are your acceptance criteria.
 3.  **Determine implementation approach**:
     - **TDD** — if backend service files or utility functions are implemented. Follow [TDD guide](references/tdd.md).

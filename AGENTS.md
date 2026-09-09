@@ -9,9 +9,8 @@ Keep responses short and direct. Lead with the answer or result.
 - **Code reviews** → use `Ada - Reviewer` for feature correctness and `Jeffery - Reviewer` for code quality
 - **Quality assurance and validation** → use `Preye - QA Engineer` for UI validation and `Eren - QA Engineer` for test plan execution
 - **Feature design, architecture, or technical planning** → use the `Ezenwa - Senior Tech Lead` agent
-- **Process auditing / step verification** → use the `Nnedi - Babysitter` agent
 
-Always spawn the appropriate subagent rather than handling inline. When delegating, provide the task and relevant file paths only — do not specify how the agent should approach its work, which rules to apply, or which patterns to follow. Agents are already primed with their own instructions and will discover what they need from the workspace.
+These kinds of work go to their agent rather than being handled inline; anything else you handle yourself. When delegating, provide the task and relevant file paths only — do not specify how the agent should approach its work, which rules to apply, or which patterns to follow. Agents are already primed with their own instructions and will discover what they need from the workspace.
 
 ## Validating work done
 

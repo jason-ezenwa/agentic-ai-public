@@ -15,11 +15,11 @@ Services should only directly access models that belong to their own module. Cro
 - **NEVER** import schemas from other modules in service files
 - Each module's service is the **ONLY** place that should directly interact with its own model
 
-### 2. Cross-Module Data Access Pattern
-When a service needs to interact with data from another module:
-- **ALWAYS** inject and use the appropriate service from that module
-- **NEVER** directly inject or manipulate foreign models
-- If the required service method doesn't exist, create it in the owning module first
+### 2. Types Are Allowed
+The restriction is on **database operations**, not on types. Using another module's types (document types like `StudentDocument`, DTOs, interfaces, enums) is fine — you need them to type what its service returns.
+- **ALLOWED**: `import type { StudentDocument } from '../student/student.schema'` in any module, when used purely as a type
+- **NOT ALLOWED**: using an imported schema class at runtime — `@InjectModel()`, model construction, or any query/write against a collection the module doesn't own
+- Prefer `import type` for these imports so the compile-time-only intent is explicit and distinguishable from a real schema import
 
 ### 3. Examples
 
@@ -48,8 +48,8 @@ export class OnboardingService {
 ```
 
 ### 4. Module Ownership
-- `user/` module: owns `User` model - only `UserService` should inject `User` model
-- `student/` module: owns `Student` model - only `StudentService` should inject `Student` model
+- `user/` module: owns `User` model/schema - only `UserService` should inject `User` model
+- `student/` module: owns `Student` model/schema - only `StudentService` should inject `Student` model
 - `onboarding/` module: should not inject any models directly, only use other services
 
 ### 5. Service Method Creation
@@ -57,13 +57,3 @@ If you need a specific operation that doesn't exist in the target service:
 1. Create the method in the appropriate service (e.g., `UserService.findById()`)
 2. Export the service from its module
 3. Import and use the service in your module
-
-### 6. File Patterns to Watch
-- Any `@InjectModel()` outside of the model's home module
-- Any schema imports like `import { User } from '../user/user.schema'` in non-user services
-- Direct model manipulation in services that don't own the model
-
-### 7. Enforcement
-- Services should only import and inject models from their own module directory
-- Cross-module dependencies should be service-to-service only
-- Each model should have exactly one service that manages its direct database operations

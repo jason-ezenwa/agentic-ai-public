@@ -29,8 +29,8 @@ deliberately, as if someone is watching and following along.
 2. **Read the authentication & transport reference.** The
    [authentication & transport reference](references/authentication-and-transport.md)
    defines transport selection (headless vs attached), the pre-flight check for
-   attached sessions, and every browser and API auth flow. You must read this
-   before any work. This is mandatory and must not be skipped.
+   attached sessions, and every browser and API auth flow. Read it before any
+   work.
 
 3. **Learn how to drive the browser.** Read the
    [playwright-cli manual](references/playwright-cli.md) — the tool manual for

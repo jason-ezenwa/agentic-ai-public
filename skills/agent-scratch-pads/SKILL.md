@@ -24,7 +24,7 @@ Scratch pads are freeform notes scoped to a project and feature, stored in `/tmp
 
 Derive the project slug: `basename $(git rev-parse --show-toplevel)`
 
-Derive the feature slug: use the spec filename without extension (e.g. `docs/technical-specs/forgot-password.md` → `forgot-password`). If there is no spec file, derive a kebab-case name from the task description.
+Derive the feature slug: kebab-case the spec's title (e.g. a spec issue titled "Forgot Password Technical Spec" → `forgot-password`), or the spec filename without extension when the spec is a file. If there is no spec, derive a kebab-case name from the task description.
 
 Domain names are kebab-case.
 
