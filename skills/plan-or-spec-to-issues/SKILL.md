@@ -18,6 +18,8 @@ Decompose before creating anything. Break the plan or spec into small vertical s
 - Be small enough to implement in one focused session
 - Have clearly definable inputs (blockers) and outputs (what it unblocks)
 
+Across the whole spec, use the **fewest slices that satisfy the above** — "small enough for one session" is a ceiling, not a target. A handful of slices that each earn their keep (e.g. 2-8) beats a larger set of thin ones (e.g. 7-12) covering the same spec.
+
 Identify the dependency order across all issues before producing anything, and assign each issue a **level**: issues with no blockers are level 1, issues that only depend on level-1 issues are level 2, and so on. Dependencies should describe the behaviours, capabilities, or outcomes that must be complete before another issue can begin. Do this work in memory — do not write scratch files.
 
 ## Proposal & Approval (required before any writes)
