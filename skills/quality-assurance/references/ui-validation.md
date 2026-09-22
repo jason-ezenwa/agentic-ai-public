@@ -2,17 +2,26 @@
 
 You will receive a local URL, Figma node IDs, frame dimensions, and a description of what to validate.
 
+**Acceptable deviations are only the ones called out in the spec** — not ones
+named by whoever briefed you. Read the spec's own list. Anything else that
+departs from the frames is a finding.
+
 **Scope: visual fidelity only.** This mode validates that the implementation matches the Figma design. Clicking through the UI to reach a state, step, or page you need to screenshot is fine — that is navigation. What is out of scope is asserting that behaviour works.
 
 ## Judgment model
 
 Validation uses two co-equal evidence layers — they catch different bugs and neither replaces the other. The pixel diff is an instrument that serves both, not a third layer (see below).
 
-**Deterministic layer** (computed ground truth, measured through `playwright-cli eval` / `run-code`) owns geometry/layout and color:
+**Deterministic layer** (computed ground truth, measured through `playwright-cli eval` / `run-code`) owns geometry/layout, color, and text metrics:
 - **Layout and positioning** — compared via computed bounding boxes (`getBoundingClientRect`) and computed styles. Report pixel deltas.
 - **Color** — pulled via `getComputedStyle` on the live elements, not eyeballed off a screenshot (edge anti-aliasing makes screenshot hex unreliable). Report the actual hex codes so the main agent can act on them directly.
+- **Text metrics** — `font-size`, `font-weight`, `line-height`,
+  `letter-spacing`, `color`, via `getComputedStyle` on every text element in
+  the criteria. 13px/500 and 14px/400 look identical in a screenshot and are
+  one query apart.
 
-**Vision layer** owns typography and overall visual consistency, judged by inspecting implementation screenshot, Figma reference, and pixel diff mask together. Some rendering leeway is intentional: font hinting and sub-pixel anti-aliasing differ across environments (a Linux cloud sandbox will never byte-match a Figma export) — so visual fidelity is judged within tolerance, not by identical bytes.
+**Vision layer** owns rendering quality and overall visual consistency — how
+things render, not what they are set to. Some rendering leeway is intentional: font hinting and sub-pixel anti-aliasing differ across environments (a Linux cloud sandbox will never byte-match a Figma export) — so visual fidelity is judged within tolerance, not by identical bytes.
 
 **Pixel diff — instrument, not a layer.** pixelmatch aligns the implementation screenshot and Figma reference and emits a diff mask. It issues no verdict of its own: it points the vision layer at regions worth inspecting — catching divergences the deterministic layer would never think to query (a stray badge, a missing icon, a shifted block) — and cross-checks the deterministic layer. Its `pct` is an inspection trigger, never a pass/fail gate; a clean deterministic + vision result stands even when `pct` is a noisy low-single-digit number.
 
@@ -22,7 +31,15 @@ Screenshots are required evidence output — they feed the vision layer and the 
 
 ### 1. Set Up the Browser
 
-Resize the browser to match the Figma frame dimensions provided.
+Set the viewport to the Figma frame's exact dimensions and capture at
+`deviceScaleFactor: 1`, so the two images already match and nothing needs
+resizing. Resizing resamples every glyph, making all text read as changed and
+burying real differences in that noise.
+
+If implementation and frame genuinely differ in size — a sanctioned deviation
+means the frame carries a row the build does not — do not crop to an eyeballed
+"common region". Crop both to the same element's box and diff that. Crops of
+differing dimensions are not a valid comparison.
 
 ### 2. Navigate and Orient
 
@@ -39,6 +56,14 @@ Take a screenshot of the current state. For pages with multiple sections, naviga
 Always re-capture the implementation screenshot each pass — it changes as the main agent edits code.
 
 ### 5. Fetch (or reuse) the Figma Reference
+
+Fetch both artifacts for every node: the **screenshot** (`get_screenshot`) and
+the **design context** (`get_design_context`). The screenshot is what the
+vision layer compares against; the design context is the only structured
+source of per-element properties, and step 7 builds the checklist from it.
+
+`get_design_context`'s description asks for `figma-design-to-code` guidance
+first. You do not need it for validation — call the tool anyway.
 
 The Figma reference is immutable for a given node ID during a validation session. It may already be cached on disk from an earlier step; reuse what exists and fetch only the misses rather than calling Figma every pass.
 
@@ -104,23 +129,26 @@ The script prints a JSON line — read it to continue: `{ "numDiff": 4213, "pct"
 
 "Pixel parity" is judged on the **overall `pct`** the script reports — the share of pixels that differ — not on byte-identical images. The `threshold` is a per-pixel sensitivity knob fed to `pixelmatch` (how different a single pixel's channels must be to count as changed); `pct` is the aggregate you assess.
 
-`pct` is an **inspection trigger, not a pass/fail gate**. A low-single-digit `pct` is normal — sub-pixel font hinting alone scatters changed pixels across every glyph. When `pct` rises into the low single digits, open the diff mask and let it plus the vision pass decide whether the clusters are a real divergence (concentrated in a region — a missing element, a shifted block, a wrong color) or just rendering noise (thin halos along text and edges). Do not treat any single percentage as the verdict.
+`pct` is an **inspection trigger, not a pass/fail gate**. A low-single-digit `pct` is normal — sub-pixel font hinting alone scatters changed pixels across every glyph. When `pct` rises into the low single digits, open the diff mask and resolve each distinct cluster on its own: name the element it sits on and the property that explains it. A cluster is rendering noise only if it is a thin halo along a glyph or edge — anything solid or element-shaped is a finding until measured. Do not treat any single percentage as the verdict.
 
 ### 7. Validate Against Criteria
 
-The criteria are the specific items in the validation description, each routed to the layer reliable for it. The pixel diff is **not itself a criterion** — instead, every cluster the diff mask flags must be explained as either a real divergence (routed to the layer that can confirm it) or rendering noise.
+Build the checklist from the design context: every element it lists, and the
+properties it declares for each. Items named in the brief are added on top —
+they are examples, never the full list.
 
 **Deterministic layer — judge on computed values, report the actionable numbers:**
 
-1. **Layout** — pull bounding boxes and positions via `playwright-cli eval` / `run-code` (`getBoundingClientRect`, `getComputedStyle`). Compare against Figma node dimensions. Report pixel deltas. Use the pixelmatch diff mask to direct attention to visually divergent regions.
-2. **Colors** — pull hex values from live elements via `getComputedStyle`. Report actual hex codes in findings (e.g., "button background is `#2563EB`, Figma shows `#1D4ED8`").
+1. **Layout** — see Judgment model. Report pixel deltas against Figma node dimensions; use the diff mask to direct attention to visually divergent regions.
+2. **Colors** — see Judgment model. Report actual hex codes in findings (e.g., "button background is `#2563EB`, Figma shows `#1D4ED8`").
 3. **Borders & Radii** — pull `border-radius`, `border-width`, `border-color` from `getComputedStyle`.
+4. **Text metrics** — see Judgment model. Report actual values against the design context's typography spec.
 
 **Vision layer — judge by inspecting implementation + reference + diff mask together:**
 
-4. **Typography** — font family, size, weight, line height, color rendering.
-5. **Assets** — images, icons, illustrations rendering correctly.
-6. **Overall visual consistency** — review the diff mask for regions flagged as different that computed styles did not catch.
+5. **Type rendering** — see Judgment model.
+6. **Assets** — images, icons, illustrations rendering correctly.
+7. **Overall visual consistency** — review the diff mask for regions flagged as different that computed styles did not catch.
 
 ### 8. Validate Interactive States
 
