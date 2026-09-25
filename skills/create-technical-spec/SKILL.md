@@ -13,6 +13,8 @@ This skill guides the creation of technical specification documents using a stan
 2.  **Generate Content**: Use the template below to structure the document.
     -   **Flexible Application**: Not every use case requires every section of the template. Use your best judgment to determine which sections are relevant and necessary for the specific task. Omit sections that are not applicable.
     -   **Professional Tone**: Maintain a clear, concise, and professional technical writing style.
+    -   **Figma Drives UI, Not Prose**: When Figma or other design references exist, link them and let the implementing agent read the design directly — don't describe colors, spacing, layout, or copy in prose. A wrong description in the spec risks being what gets implemented instead of the actual design. Describe UI details directly only when no Figma or design reference is provided.
+    -   **No Repetition**: Don't restate the same fact across sections. A repeat is fine when it adds new information (e.g. a code snippet backing up a rule already stated in prose); repeating the same information in the same form is not.
 3.  **Publish the Spec**: See **Publishing** below.
 4.  **QA Test Plan**: After the spec is published, propose a QA test plan to the user. Draft a suggested plan based on the spec's goals, API design, and any Figma references, then present it with the following structure:
     - A brief summary of what will be tested
@@ -35,7 +37,7 @@ The spec is created directly as a GitHub issue on the current repo.
 
 ## Editing After Creation
 
-Once the spec is published, the **issue body is the source of truth**. Make edits directly on the issue — `gh issue edit <num> --body-file <new>` locally, or through the issue UI in any cloud session.
+Once the spec is published, the **issue body is the source of truth**. Make edits directly on the issue: write the updated body to a temporary file, cross-check it contains only the intended changes, then apply with `gh issue edit <num> --body-file <new>`.
 
 ## Technical Spec Template
 
@@ -207,7 +209,7 @@ For each migration:
 ---
 
 ## Documentation
-- [ ] API docs (OpenAPI/Swagger)
+- [ ] API docs (Insomnia/OpenAPI/Swagger)
 - [ ] Architecture diagrams
 - [ ] Runbook for on-call
 - [ ] Developer guide

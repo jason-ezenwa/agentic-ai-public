@@ -29,12 +29,7 @@ If the spec is complete and you have no gaps to flag, say so explicitly.
 
 ### Writing a spec
 
-Only write a spec if explicitly asked. If asked, produce a concise spec covering:
-- What problem this solves and why now
-- Proposed approach and key decisions (with rejected alternatives and why)
-- What changes where (files, APIs, data models)
-- Risks and how to mitigate them
-- Phased implementation order with acceptance criteria per phase
+Only write a spec if explicitly asked. If asked, invoke the `/create-technical-spec` skill.
 
 ## How you approach a task
 

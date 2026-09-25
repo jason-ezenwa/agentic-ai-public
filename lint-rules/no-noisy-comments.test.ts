@@ -114,7 +114,7 @@ ruleTester.run('no-noisy-comments', noNoisyComments, {
     // JSDoc with three prose lines
     {
       code: `const y = 2\n/**\n * Retries the job.\n * The cap is per job.\n * Not per portal.\n */\nfunction retry() {}`,
-      errors: [noisy('has a 3-line summary (max 2)')],
+      errors: [noisy('has a 3-line JSDoc summary (max 2. Excludes tags)')],
     },
     // JSDoc with a wrapped @param
     {
@@ -205,7 +205,7 @@ ruleTester.run('no-noisy-comments', noNoisyComments, {
       code: `const y = 2\n/**\n * This method retries the job.\n * The cap is per job.\n * Not per portal.\n * @param job the job to retry, which must already\n *   have been claimed\n */\nfunction retry(job) {}`,
       errors: [
         fullMessage(
-          `has a 3-line summary (max 2), has a multi-line @param tag and opens with narration ('This method')`,
+          `has a 3-line JSDoc summary (max 2. Excludes tags), has a multi-line @param tag and opens with narration ('This method')`,
         ),
       ],
     },

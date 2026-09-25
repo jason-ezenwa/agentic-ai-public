@@ -50,7 +50,7 @@ function lengthFaults(kind, lines) {
     const firstTag = lines.findIndex((line) => line.startsWith('@'))
     const prose = firstTag === -1 ? lines : lines.slice(0, firstTag)
     if (prose.length > MAX_LINES) {
-      faults.push(`has a ${prose.length}-line summary (max ${MAX_LINES})`)
+      faults.push(`has a ${prose.length}-line JSDoc summary (max ${MAX_LINES}. Excludes tags)`)
     }
     if (firstTag !== -1) {
       let tag = null
