@@ -12,8 +12,9 @@ departs from the frames is a finding.
 
 Validation uses two co-equal evidence layers — they catch different bugs and neither replaces the other. The pixel diff is an instrument that serves both, not a third layer (see below).
 
-**Deterministic layer** (computed ground truth, measured through `playwright-cli eval` / `run-code`) owns geometry/layout, color, and text metrics:
+**Deterministic layer** (computed ground truth, measured through `playwright-cli eval` / `run-code`) owns geometry/layout, spacing/alignment, color, and text metrics:
 - **Layout and positioning** — compared via computed bounding boxes (`getBoundingClientRect`) and computed styles. Report pixel deltas.
+- **Spacing and alignment** — see step 7.
 - **Color** — pulled via `getComputedStyle` on the live elements, not eyeballed off a screenshot (edge anti-aliasing makes screenshot hex unreliable). Report the actual hex codes so the main agent can act on them directly.
 - **Text metrics** — `font-size`, `font-weight`, `line-height`,
   `letter-spacing`, `color`, via `getComputedStyle` on every text element in
@@ -25,6 +26,8 @@ things render, not what they are set to. Some rendering leeway is intentional: f
 
 **Pixel diff — instrument, not a layer.** pixelmatch aligns the implementation screenshot and Figma reference and emits a diff mask. It issues no verdict of its own: it points the vision layer at regions worth inspecting — catching divergences the deterministic layer would never think to query (a stray badge, a missing icon, a shifted block) — and cross-checks the deterministic layer. Its `pct` is an inspection trigger, never a pass/fail gate; a clean deterministic + vision result stands even when `pct` is a noisy low-single-digit number.
 
+Images may be at any scale (1x capture, 2x reference); computed values are always in CSS pixels. Report every number from computed values (`getBoundingClientRect`, `getComputedStyle`), never by measuring pixels in an image. Images and the diff mask show *where* something differs; the browser measures *how much*.
+
 Screenshots are required evidence output — they feed the vision layer and the output report.
 
 ## Process
@@ -32,9 +35,8 @@ Screenshots are required evidence output — they feed the vision layer and the 
 ### 1. Set Up the Browser
 
 Set the viewport to the Figma frame's exact dimensions and capture at
-`deviceScaleFactor: 1`, so the two images already match and nothing needs
-resizing. Resizing resamples every glyph, making all text read as changed and
-burying real differences in that noise.
+the environment's default scale. Don't set a device scale — the script
+matches the capture's scale against the cached reference's scale.
 
 If implementation and frame genuinely differ in size — a sanctioned deviation
 means the frame carries a row the build does not — do not crop to an eyeballed
@@ -86,11 +88,12 @@ Example — fileKey `aBcD1234`, nodeId `1:23`, scale `2x`, feature slug `checkou
 **Cache lookup each pass** — reuse anything left by the implementation step; fetch and save only what's missing:
 
 ```bash
+SCALE=2 # always fetch and cache Figma references at 2x
 STEM="/tmp/${SLUG}/figma-references/figma-ref__${FILE_KEY}__${NODE_ID//:/-}"
 PNG="${STEM}__${SCALE}x.png"
 CTX="${STEM}__context.txt"
 
-# Screenshot: reuse if cached, else call get_screenshot(fileKey, nodeId) and save the PNG to $PNG
+# Screenshot: reuse only the __2x.png cache entry, else call get_screenshot(fileKey, nodeId, scale=2) and save the PNG to $PNG
 [ -f "$PNG" ] && echo "reuse $PNG" || echo "fetch get_screenshot → save to $PNG"
 
 # Design context: reuse if cached, else call get_design_context(fileKey, nodeId) and save the JSON to $CTX
@@ -101,7 +104,7 @@ CTX="${STEM}__context.txt"
 
 ### 6. Run the Pixel Diff
 
-Run the vendored helper — it resolves `pngjs`/`pixelmatch` from the runtime (or installs them once into a shared `/tmp` dir on first use), resizes the implementation to the Figma frame, and writes the diff mask:
+Run the vendored helper — it resolves `pngjs`/`pixelmatch` from the runtime (or installs them once into a shared `/tmp` dir on first use), matches the two images' scales, and writes the diff mask:
 
 ```bash
 scripts/pixel-diff.mjs <impl.png> <figma-ref.png> <out-mask.png> [threshold=0.15]
@@ -125,7 +128,7 @@ node scripts/pixel-diff.mjs \
   /tmp/quality-assurance/checkout-redesign/ui-validation/pixelmatch-diff__1-23.png
 ```
 
-The script prints a JSON line — read it to continue: `{ "numDiff": 4213, "pct": 2.04, "width": 760, "height": 272 }`. Record `pct` and the differing pixel count. The helper handles the dimension mismatch (nearest-neighbour resize, no `canvas`) and the `pixelmatch` v7 ESM interop internally, so you do not need to manage module resolution yourself.
+The script prints a JSON line — read it to continue: `{ "numDiff": 4213, "pct": 2.04, "width": 760, "height": 272, "factor": 2 }`. Record `pct` and the differing pixel count. `width`/`height` are the compared (smaller) size; `factor` is the integer scale the larger image was shrunk by. An exact multiple (e.g. a 2x reference against a 1x capture) is matched by shrinking the larger image; any other size mismatch exits `3` — it means the viewport wasn't set to the frame size, so fix the capture rather than the script. The helper handles the `pixelmatch` v7 ESM interop internally, so you do not need to manage module resolution yourself.
 
 "Pixel parity" is judged on the **overall `pct`** the script reports — the share of pixels that differ — not on byte-identical images. The `threshold` is a per-pixel sensitivity knob fed to `pixelmatch` (how different a single pixel's channels must be to count as changed); `pct` is the aggregate you assess.
 
@@ -140,15 +143,16 @@ they are examples, never the full list.
 **Deterministic layer — judge on computed values, report the actionable numbers:**
 
 1. **Layout** — see Judgment model. Report pixel deltas against Figma node dimensions; use the diff mask to direct attention to visually divergent regions.
-2. **Colors** — see Judgment model. Report actual hex codes in findings (e.g., "button background is `#2563EB`, Figma shows `#1D4ED8`").
-3. **Borders & Radii** — pull `border-radius`, `border-width`, `border-color` from `getComputedStyle`.
-4. **Text metrics** — see Judgment model. Report actual values against the design context's typography spec.
+2. **Spacing & alignment** — per container and sibling group in the design context: sibling gaps, container padding, and edges or centre lines that should align, using the auto-layout values as expected. Report the relationship ("heading → subtext gap 24px, design 16px"), not the position shifts it causes downstream.
+3. **Colors** — see Judgment model. Report actual hex codes in findings (e.g., "button background is `#2563EB`, Figma shows `#1D4ED8`").
+4. **Borders & Radii** — pull `border-radius`, `border-width`, `border-color` from `getComputedStyle`.
+5. **Text metrics** — see Judgment model. Report actual values against the design context's typography spec.
 
 **Vision layer — judge by inspecting implementation + reference + diff mask together:**
 
-5. **Type rendering** — see Judgment model.
-6. **Assets** — images, icons, illustrations rendering correctly.
-7. **Overall visual consistency** — review the diff mask for regions flagged as different that computed styles did not catch.
+6. **Type rendering** — see Judgment model.
+7. **Assets** — images, icons, illustrations rendering correctly.
+8. **Overall visual consistency** — review the diff mask for regions flagged as different that computed styles did not catch.
 
 ### 8. Validate Interactive States
 
