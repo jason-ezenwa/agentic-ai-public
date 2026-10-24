@@ -2,31 +2,15 @@
 
 ---
 
-## Step 1: Get Node ID
+## Step 1: Get File Key and Node ID
 
-### Option A: Parse from Figma URL
-
-When the user provides a Figma URL, extract the file key and node ID.
-
-**URL format:** `https://figma.com/design/:fileKey/:fileName?node-id=1-2`
-
-- **File key:** the segment after `/design/`
-- **Node ID:** the value of the `node-id` query parameter (e.g., `42-15`)
-
-**Example:**
-- URL: `https://figma.com/design/kL9xQn2VwM8pYrTb4ZcHjF/DesignSystem?node-id=42-15`
-- File key: `kL9xQn2VwM8pYrTb4ZcHjF`
-- Node ID: `42-15`
-
-### Option B: Figma Desktop App Selection (`figma-desktop` MCP only)
-
-When using the `figma-desktop` MCP and the user has NOT provided a URL, tools automatically use the currently selected node from the open Figma file. Only `nodeId` is needed — the server infers the file automatically.
+Take the file key and node ID from the Figma URL in the spec (or from the user). With the `figma-desktop` MCP and no URL, tools use the currently selected node and only `nodeId` is needed.
 
 ---
 
 ## Steps 2 & 3: Fetch Design Context + Preview (Run in Parallel)
 
-Fetch design context and screenshot concurrently — all fetching happens simultaneously before implementation begins.
+For each frame, fetch design context and screenshot concurrently, before implementation begins.
 
 ### Reference storage and reuse
 
@@ -54,20 +38,6 @@ CTX="${STEM}__context.txt"
 
 `/tmp` clears on restart and cloud sessions start fresh — no manual invalidation needed.
 
-### For a single frame
-
-```
-get_design_context(fileKey=":fileKey", nodeId="1-2")   # save output to context.txt (skip if cached)
-get_screenshot(fileKey=":fileKey", nodeId="1-2")       # save PNG (skip if cached)
-```
-
-### For multiple frames
-
-For each frame, run:
-1. `get_design_context` for that frame — returns the full context (layout, typography, colors, spacing, tokens); save it to `context.txt` (see Reference storage and reuse), skipping the call if cached
-2. `get_screenshot` for that frame — save the PNG, skipping the call if cached
-3. Note the complete design context and any Code Connect findings
-
 ### Handling large design contexts
 
 **If `get_design_context` is truncated or too large** (for any frame):
@@ -94,28 +64,8 @@ For any images, icons, or SVGs returned by the Figma MCP server, download them i
 
 ## Step 5: Implement the Code
 
-Translate the Figma output into the project's framework, styles, and conventions.
+Treat the Figma MCP output as a design + behaviour reference, not final code style.
 
-**Key principles:**
-- Treat the Figma MCP output as a design + behaviour reference, not final code style.
 - **Always** check for existing components before creating new ones — reuse over recreation.
-- Replace Tailwind utility classes with the project's design system tokens and conventions where they differ.
-- Use the project's color system, typography scale, and spacing tokens consistently.
-- Respect existing routing, state management, and data-fetching patterns.
-- When project design tokens differ from Figma values, prefer project tokens but adjust spacing/sizing minimally to maintain visual fidelity.
-- Follow WCAG accessibility requirements.
-- Add TypeScript types for all component props.
+- Prefer the project's design system tokens over Figma or Tailwind values where they differ, adjusting spacing/sizing minimally to maintain visual fidelity.
 - Add JSDoc comments for exported components.
-- Avoid hardcoded values — extract to constants or design tokens.
-
----
-
-## Common Issues & Solutions
-
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| Design context is truncated | Design is too complex for a single response | Use `get_metadata` to get node structure, then fetch specific child nodes individually |
-| Visual mismatch after implementation | Spacing, colour, or typography discrepancy | Fix the flagged CSS properties, then send to the same QA sub-agent for re-validation |
-| Assets not loading | `localhost` URLs being modified | Use the MCP-provided `localhost` URLs directly without modification |
-| Design tokens differ from Figma | Project tokens have different values | Prefer project tokens for consistency; adjust spacing/sizing minimally to match visuals |
-| Code Connect script appears | Component mapping required | Stop and follow the script exactly; do not proceed until resolved or skipped |

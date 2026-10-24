@@ -114,7 +114,7 @@ The note is created directly as a GitHub issue on the current repo.
 1.  Ensure the `research` label exists on the repo without overwriting an existing one: `gh label create research --color bfd4f2 --description "Research note or initial planning note that grounds a chunk of work" 2>/dev/null || true`. This creates the label if missing and is a no-op if it already exists (regardless of the existing color or description).
 2.  Write the body to a tempfile under `/tmp` (e.g. `/tmp/research-<feature>-<chunk>-<timestamp>.md`) — feature *and* chunk in the title, since `<feature>-Research` collides on the second run. `/tmp` is cleared on reboot, so no manual cleanup is required.
 3.  Create the issue: `gh issue create --title "<Feature>-<Chunk> Research" --label research --body-file /tmp/research-<feature>-<chunk>-<timestamp>.md`. The body's `# <Feature>-<Chunk> Research` heading must match this title exactly.
-4.  Report the issue URL and number back to the user.
+4.  Reply with the issue link and a summary of at most three sentences. Do not list findings, recommendations, or open decisions in chat, even if the request asked questions; the note answers them. Point to the section instead.
 
 - Header: the H1 is the only title — no separate Title field. Below it, identify the agent
   or tool and model that wrote the note. The user commissioned it and owns the decisions it

@@ -111,8 +111,9 @@ is visually wrong, re-record. Only deliver a take you have eyes-on confirmed.
 
 ### 6. Deliver
 
-Save the final `.webm` under the convention path (below) and **surface it to
-the user** using whatever file-delivery capability is available in the session,
+Save the final `.webm` under the convention path (below), convert it to
+`.mp4`, and **surface the `.mp4` to the user** using whatever file-delivery
+capability is available in the session,
 alongside a short summary: which scenarios were demoed, the outline followed,
 and the file path(s). Invite sign-off or modification requests. Do not block on
 a tool that may not exist — if no delivery capability is available, report the
@@ -162,8 +163,9 @@ Derive `<feature-slug>` the same way the scratch-pad skill does: the spec
 filename without extension, or a kebab-case name from the task description.
 `<beat>` is a short kebab-case label for the moment (e.g. `post-login`,
 `dashboard`, `chat-panel-open`, `message-sent`). Create the directory if it
-does not exist. Output is **`.webm` only** — there is no system ffmpeg capable
-of mp4, and Playwright's bundled ffmpeg is webm-only by design.
+does not exist. After recording, convert the `.webm` to an H.264 `.mp4` and
+deliver that (Playwright's ffmpeg can't; use the one from Python's
+`imageio-ffmpeg` package).
 
 ---
 

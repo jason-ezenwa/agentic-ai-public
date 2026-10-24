@@ -9,9 +9,7 @@ description: Implements a feature based on a provided technical specification, e
 
 Take the approved technical spec through implementation, verification, and a PR.
 
-Read the spec first, build what it says, stay inside its goals and non-goals, then verify the assembled work before raising the PR.
-
-Do not split your attention between building and final QA: finish the implementation, run the required checks, then verify it properly.
+Work through the steps below in order. Verification (Step 4) runs only after implementation and spot checks are done — do not invoke `/sub-agent-driven-verification` while reading this skill or before you reach that step.
 
 ## Workflow
 
@@ -19,7 +17,7 @@ Do not split your attention between building and final QA: finish the implementa
 Invoke the `/setup-worktree` skill to create an isolated worktree for this task. Follow its usage instructions.
 
 ### 1a. Analysis & Planning
-1.  **Read the Spec**: A GitHub issue (`gh issue view <num> --json body -q .body`) or a file path.
+1.  **Read the Spec**: A GitHub issue or a file path.
 2.  **Understand Guardrails**: Pay close attention to the "Goals", "Non-Goals", and "API Design" sections. These are your acceptance criteria.
 3.  **Determine implementation approach**:
     - **TDD** — if backend service files or utility functions are implemented. Follow [TDD guide](references/tdd.md).
@@ -46,7 +44,7 @@ Build the list from this shape:
 
 Both frontend and backend work can be parallelised, as long as the streams are genuinely independent.
 
-Before writing any code, read the spec and identify independent work streams — frontend components/pages/hooks or backend services/modules that don't depend on each other at compile time. Each stream must live in its **own module/area whose files don't overlap another stream's** — this matters especially for the TDD workflow, so each subagent can run its own red→green loop without colliding with another's tests or sources.
+Before writing any code, read the spec and identify independent work streams — frontend components/pages/hooks or backend services/modules that don't depend on each other at compile time. Each stream must live in its **own module/area whose files don't overlap another stream's** — this matters especially for the TDD workflow, so each subagent can run its own red→green loop without colliding with another's tests or sources. A backend stream is a full slice of a module (service, DTOs, etc.), owned end to end by one subagent.
 
 Settle the shared dependencies before sub-agents begin work when independent streams need them (this gives each stream a stable contract and avoids overlapping changes). Then delegate only work that can proceed independently, in separate areas of the codebase. Use up to three sub-agents when the work genuinely benefits from it; keep a small or tightly coupled change sequential.
 
@@ -78,6 +76,8 @@ One commit covers the implementation and any fixes verification applied, in Conv
 The PR body, omitting any section whose step was skipped:
 
 ```markdown
+Closes #<issue number>
+
 ## Summary
 <Concise description of what was achieved from the spec>
 

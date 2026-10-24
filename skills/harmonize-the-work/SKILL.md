@@ -1,6 +1,7 @@
 ---
 name: harmonize-the-work
-description: Harmonize and clean up work done across multiple implementing agents/sessions after a milestone or significant chunk of a spec has been delivered. Use when the user says "harmonize the work", "harmonize the branch", or wants a cleanup pass across chunks of related work.
+description: Cleans up work done across multiple agents or sessions after a milestone or significant chunk of a spec has been delivered.
+disable-model-invocation: true
 ---
 
 # Harmonizing the Work

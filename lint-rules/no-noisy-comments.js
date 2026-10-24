@@ -2,13 +2,14 @@
 // line: a comment that restates the code should be deleted (fix the naming if
 // that is the real gap); one that explains why should stay, trimmed to the
 // shortest version that still carries the reason. Three faults, listed in one
-// report per comment: length over two lines (a `//` run, a block, JSDoc prose,
-// or a wrapped JSDoc tag); a change-narration opener ("Added", "This function");
-// a request marker ("as requested", "per the spec"), first match only. A block
-// or JSDoc comment starting on line 1 is a license header and skips the length
-// check only.
+// report per comment: length over two lines (a `//` run, a block, or a wrapped
+// JSDoc tag), or over three for a JSDoc summary; a change-narration opener
+// ("Added", "This function"); a request marker ("as requested", "per the
+// spec"), first match only. A block or JSDoc comment starting on line 1 is a
+// license header and skips the length check only.
 
 const MAX_LINES = 2
+const MAX_JSDOC_SUMMARY_LINES = 3
 
 const NARRATION_OPENER =
   /^\s*(added|updated|changed|fixed|removed|refactored|now|this function|this method|here we)\b/i
@@ -49,8 +50,10 @@ function lengthFaults(kind, lines) {
     const faults = []
     const firstTag = lines.findIndex((line) => line.startsWith('@'))
     const prose = firstTag === -1 ? lines : lines.slice(0, firstTag)
-    if (prose.length > MAX_LINES) {
-      faults.push(`has a ${prose.length}-line JSDoc summary (max ${MAX_LINES}. Excludes tags)`)
+    if (prose.length > MAX_JSDOC_SUMMARY_LINES) {
+      faults.push(
+        `has a ${prose.length}-line JSDoc summary (max ${MAX_JSDOC_SUMMARY_LINES}. Excludes tags)`,
+      )
     }
     if (firstTag !== -1) {
       let tag = null
@@ -92,7 +95,7 @@ export const noNoisyComments = {
     type: 'suggestion',
     docs: {
       description:
-        'Disallow comments longer than two lines, comments that open by narrating a change, and comments that cite a request ("as requested", "per the spec"). One report per comment, listing every fault.',
+        'Disallow comments longer than two lines (three for a JSDoc summary), comments that open by narrating a change, and comments that cite a request ("as requested", "per the spec"). One report per comment, listing every fault.',
     },
     schema: [],
     messages: {
