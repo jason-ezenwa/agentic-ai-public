@@ -98,8 +98,8 @@ playwright-cli snapshot --boxes                 # include [box=x,y,w,h] per elem
 playwright-cli --raw snapshot > before.yml      # value-only, pipeable
 playwright-cli eval "document.title"            # run JS on the page
 playwright-cli eval "el => el.textContent" e5   # run JS against an element
-playwright-cli screenshot --filename=page.png   # save a screenshot
-playwright-cli screenshot e5 --filename=el.png  # element screenshot
+playwright-cli screenshot --hires --filename=page.png   # screenshot at device pixels
+playwright-cli screenshot e5 --hires --filename=el.png  # element screenshot
 playwright-cli console                          # console messages
 playwright-cli console error                    # filter by min level
 playwright-cli requests                         # list network requests (numbered)

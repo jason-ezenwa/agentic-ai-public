@@ -1,6 +1,7 @@
 ---
 name: mutation-testing
-description: Measures whether the test suite would actually fail if the code broke, by mutating changed lines and checking which mutants survive. Use when asked to "mutation test", "check if the tests would catch it", or "are these tests any good". Invoke deliberately — never as a side effect of another skill, and never in CI.
+description: Checks whether the tests would fail if the code broke, by mutating changed lines and seeing which mutants survive.
+disable-model-invocation: true
 ---
 
 # Mutation Testing

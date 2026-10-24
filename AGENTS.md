@@ -1,9 +1,5 @@
 # Global Instructions
 
-## Communication style
-
-Keep responses short and direct. Lead with the answer or result.
-
 ## Agent delegation
 
 - **Code reviews** → use `Ada - Reviewer` for feature correctness and `Jeffery - Reviewer` for code quality

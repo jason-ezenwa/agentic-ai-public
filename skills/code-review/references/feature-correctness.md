@@ -19,7 +19,7 @@
 ## 4. Concurrency, races & idempotency
 
 - Are there shared mutable state issues, missing locks, or async operations that can interleave unsafely?
-- Are database writes atomic where they need to be?
+- Are database writes atomic where they need to be? When a sequence of writes must all succeed or none must land, recommend a transaction as the fix, not hand-rolled cleanup or recovery.
 - For handlers with external side effects (writes, payments, emails, webhooks), are operations idempotent — safe against retries, duplicate requests, or double-execution — so a repeated call doesn't double-charge or double-send?
 
 ## 5. Performance
@@ -52,4 +52,4 @@
 - Are they asserting on outcomes (return values, thrown errors) rather than implementation details (which methods were called, in what order)?
 - Do they cover real edge cases rather than just the happy path?
 - Do test names describe observable behaviour?
-- Would these tests catch a regression if the implementation changed?
+- Can each test fail? Flag tests that pass whatever the implementation does as a **Blocker**.

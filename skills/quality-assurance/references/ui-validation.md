@@ -1,12 +1,12 @@
 # UI Validation
 
-You will receive a local URL, Figma node IDs, frame dimensions, and a description of what to validate.
+You will receive a local URL, the design reference (Figma node IDs or a Claude Design artifact), frame dimensions, and a description of what to validate.
 
 **Acceptable deviations are only the ones called out in the spec** — not ones
 named by whoever briefed you. Read the spec's own list. Anything else that
 departs from the frames is a finding.
 
-**Scope: visual fidelity only.** This mode validates that the implementation matches the Figma design. Clicking through the UI to reach a state, step, or page you need to screenshot is fine — that is navigation. What is out of scope is asserting that behaviour works.
+**Scope: visual fidelity only.** This mode validates that the implementation matches the design. Clicking through the UI to reach a state, step, or page you need to screenshot is fine — that is navigation. What is out of scope is asserting that behaviour works.
 
 ## Judgment model
 
@@ -24,9 +24,9 @@ Validation uses two co-equal evidence layers — they catch different bugs and n
 **Vision layer** owns rendering quality and overall visual consistency — how
 things render, not what they are set to. Some rendering leeway is intentional: font hinting and sub-pixel anti-aliasing differ across environments (a Linux cloud sandbox will never byte-match a Figma export) — so visual fidelity is judged within tolerance, not by identical bytes.
 
-**Pixel diff — instrument, not a layer.** pixelmatch aligns the implementation screenshot and Figma reference and emits a diff mask. It issues no verdict of its own: it points the vision layer at regions worth inspecting — catching divergences the deterministic layer would never think to query (a stray badge, a missing icon, a shifted block) — and cross-checks the deterministic layer. Its `pct` is an inspection trigger, never a pass/fail gate; a clean deterministic + vision result stands even when `pct` is a noisy low-single-digit number.
+**Pixel diff — instrument, not a layer.** pixelmatch aligns the implementation screenshot and design reference and emits a diff mask. It issues no verdict of its own: it points the vision layer at regions worth inspecting — catching divergences the deterministic layer would never think to query (a stray badge, a missing icon, a shifted block) — and cross-checks the deterministic layer. Its `pct` is an inspection trigger, never a pass/fail gate; a clean deterministic + vision result stands even when `pct` is a noisy low-single-digit number.
 
-Images may be at any scale (1x capture, 2x reference); computed values are always in CSS pixels. Report every number from computed values (`getBoundingClientRect`, `getComputedStyle`), never by measuring pixels in an image. Images and the diff mask show *where* something differs; the browser measures *how much*.
+The capture and the design reference are compared at the same scale, never rescaled; computed values are always in CSS pixels. Report every number from computed values (`getBoundingClientRect`, `getComputedStyle`), never by measuring pixels in an image. Images and the diff mask show *where* something differs; the browser measures *how much*.
 
 Screenshots are required evidence output — they feed the vision layer and the output report.
 
@@ -34,9 +34,10 @@ Screenshots are required evidence output — they feed the vision layer and the 
 
 ### 1. Set Up the Browser
 
-Set the viewport to the Figma frame's exact dimensions and capture at
-the environment's default scale. Don't set a device scale — the script
-matches the capture's scale against the cached reference's scale.
+Set the viewport to the design frame's exact dimensions. Read the capture's
+scale with `playwright-cli eval "window.devicePixelRatio"` and get the
+reference at that scale (Figma: step 5; Claude Design artifact: capture it at
+that scale) — the diff never rescales, so both must match.
 
 If implementation and frame genuinely differ in size — a sanctioned deviation
 means the frame carries a row the build does not — do not crop to an eyeballed
@@ -58,6 +59,8 @@ Take a screenshot of the current state. For pages with multiple sections, naviga
 Always re-capture the implementation screenshot each pass — it changes as the main agent edits code.
 
 ### 5. Fetch (or reuse) the Figma Reference
+
+This step is for Figma references only. For a Claude Design artifact, skip it: open the artifact in the browser at the frame size and capture the reference screenshot there, and read its element properties with `getComputedStyle` in place of the design context.
 
 Fetch both artifacts for every node: the **screenshot** (`get_screenshot`) and
 the **design context** (`get_design_context`). The screenshot is what the
@@ -88,12 +91,12 @@ Example — fileKey `aBcD1234`, nodeId `1:23`, scale `2x`, feature slug `checkou
 **Cache lookup each pass** — reuse anything left by the implementation step; fetch and save only what's missing:
 
 ```bash
-SCALE=2 # always fetch and cache Figma references at 2x
+SCALE=<devicePixelRatio> # fetch and cache the reference at the capture's scale
 STEM="/tmp/${SLUG}/figma-references/figma-ref__${FILE_KEY}__${NODE_ID//:/-}"
 PNG="${STEM}__${SCALE}x.png"
 CTX="${STEM}__context.txt"
 
-# Screenshot: reuse only the __2x.png cache entry, else call get_screenshot(fileKey, nodeId, scale=2) and save the PNG to $PNG
+# Screenshot: reuse only the __${SCALE}x.png cache entry, else call get_screenshot(fileKey, nodeId, scale=$SCALE) and save the PNG to $PNG
 [ -f "$PNG" ] && echo "reuse $PNG" || echo "fetch get_screenshot → save to $PNG"
 
 # Design context: reuse if cached, else call get_design_context(fileKey, nodeId) and save the JSON to $CTX
@@ -104,7 +107,7 @@ CTX="${STEM}__context.txt"
 
 ### 6. Run the Pixel Diff
 
-Run the vendored helper — it resolves `pngjs`/`pixelmatch` from the runtime (or installs them once into a shared `/tmp` dir on first use), matches the two images' scales, and writes the diff mask:
+Run the vendored helper — it resolves `pngjs`/`pixelmatch` from the runtime (or installs them once into a shared `/tmp` dir on first use), checks both images are the same size, and writes the diff mask:
 
 ```bash
 scripts/pixel-diff.mjs <impl.png> <figma-ref.png> <out-mask.png> [threshold=0.15]
@@ -128,7 +131,7 @@ node scripts/pixel-diff.mjs \
   /tmp/quality-assurance/checkout-redesign/ui-validation/pixelmatch-diff__1-23.png
 ```
 
-The script prints a JSON line — read it to continue: `{ "numDiff": 4213, "pct": 2.04, "width": 760, "height": 272, "factor": 2 }`. Record `pct` and the differing pixel count. `width`/`height` are the compared (smaller) size; `factor` is the integer scale the larger image was shrunk by. An exact multiple (e.g. a 2x reference against a 1x capture) is matched by shrinking the larger image; any other size mismatch exits `3` — it means the viewport wasn't set to the frame size, so fix the capture rather than the script. The helper handles the `pixelmatch` v7 ESM interop internally, so you do not need to manage module resolution yourself.
+The script prints a JSON line — read it to continue: `{ "numDiff": 4213, "pct": 2.04, "width": 1520, "height": 544 }`. Record `pct` and the differing pixel count. Any size mismatch exits `3` — the viewport wasn't set to the frame size, or the reference wasn't fetched at the capture's scale — so fix the capture or reference rather than the script. The helper handles the `pixelmatch` v7 ESM interop internally, so you do not need to manage module resolution yourself.
 
 "Pixel parity" is judged on the **overall `pct`** the script reports — the share of pixels that differ — not on byte-identical images. The `threshold` is a per-pixel sensitivity knob fed to `pixelmatch` (how different a single pixel's channels must be to count as changed); `pct` is the aggregate you assess.
 
@@ -136,15 +139,15 @@ The script prints a JSON line — read it to continue: `{ "numDiff": 4213, "pct"
 
 ### 7. Validate Against Criteria
 
-Build the checklist from the design context: every element it lists, and the
+Build the checklist from the design context (for a Claude Design artifact, its computed styles): every element it lists, and the
 properties it declares for each. Items named in the brief are added on top —
 they are examples, never the full list.
 
 **Deterministic layer — judge on computed values, report the actionable numbers:**
 
-1. **Layout** — see Judgment model. Report pixel deltas against Figma node dimensions; use the diff mask to direct attention to visually divergent regions.
+1. **Layout** — see Judgment model. Report pixel deltas against the design's dimensions; use the diff mask to direct attention to visually divergent regions.
 2. **Spacing & alignment** — per container and sibling group in the design context: sibling gaps, container padding, and edges or centre lines that should align, using the auto-layout values as expected. Report the relationship ("heading → subtext gap 24px, design 16px"), not the position shifts it causes downstream.
-3. **Colors** — see Judgment model. Report actual hex codes in findings (e.g., "button background is `#2563EB`, Figma shows `#1D4ED8`").
+3. **Colors** — see Judgment model. Report actual hex codes in findings (e.g., "button background is `#2563EB`, the design shows `#1D4ED8`").
 4. **Borders & Radii** — pull `border-radius`, `border-width`, `border-color` from `getComputedStyle`.
 5. **Text metrics** — see Judgment model. Report actual values against the design context's typography spec.
 
@@ -182,6 +185,6 @@ PASS / FAIL
 
 The Overall Verdict is PASS only if **both layers** pass. A high `pct` never forces FAIL on its own — only an unexplained real divergence, confirmed by the deterministic layer or the vision pass, does.
 
-Be specific. "Button label is `#1A1A1A`, Figma shows `#000000`" is better than "color is slightly off". Include screenshots as evidence for each failure.
+Be specific. "Button label is `#1A1A1A`, the design shows `#000000`" is better than "color is slightly off". Include screenshots as evidence for each failure.
 
-Return all screenshot files to the main agent alongside the report — implementation screenshots, Figma reference screenshots, and pixelmatch diff masks. Provide the full file paths so the main agent can access them directly.
+Return all screenshot files to the main agent alongside the report — implementation screenshots, design reference screenshots, and pixelmatch diff masks. Provide the full file paths so the main agent can access them directly.

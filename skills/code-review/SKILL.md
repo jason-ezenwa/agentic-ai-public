@@ -40,12 +40,14 @@ Then review the diff output instead of reading files directly.
 ## How to Provide Feedback
 
 - Be specific about what needs to change
-- Explain why, not just what
-- Suggest alternatives when possible
 - Tag every finding with a severity:
   - **Blocker** — must be fixed before the review passes (rule violation, bug, broken type safety)
   - **Warning** — should be fixed but won't block
   - **Suggestion** — optional improvement
+- Give every finding evidence:
+  - **Correctness** — the traced path: input or state → code path (file:line) → wrong result. Spec gaps: quote the spec line and the code that doesn't match it.
+  - **Quality** — the rule broken, the concrete cost, or what the code shows that makes it a problem.
+- A finding without evidence goes under **Taste**. Taste is never a Blocker.
 
 ---
 
@@ -57,13 +59,19 @@ Always produce a report in this exact structure:
 ## Code Review Report
 
 ### Blockers
-- <file>:<line> — <description>
+- <file>:<line> — <what's wrong>. Fix: <suggested change>
+  evidence: <traced path / rule / cost / what the code shows>
 
 ### Warnings
-- <file>:<line> — <description>
+- <file>:<line> — <what's wrong>. Fix: <suggested change>
+  evidence: <traced path / rule / cost / what the code shows>
 
 ### Suggestions
-- <file>:<line> — <description>
+- <file>:<line> — <what's wrong>. Fix: <suggested change>
+  evidence: <traced path / rule / cost / what the code shows>
+
+### Taste
+- <file>:<line> — <what's wrong>. Fix: <suggested change>
 
 ### Verdict
 PASS / FAIL  (FAIL if any Blockers exist)

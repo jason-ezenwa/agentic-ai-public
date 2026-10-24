@@ -17,21 +17,32 @@ This skill runs the verification and feedback phase on work that has already bee
 ### 1. Code Review (The "Guardrails" Check)
 Delegate code reviews to **four sub-agents in parallel** — two for feature correctness, two for code quality. All four review the full change set independently — the goal is four separate opinions, not a split. Using sub-agents avoids bias from the implementing agent reviewing its own work.
 
-Pass all four sub-agents the list of files changed and the spec content. They return reports. Using the combined reports, ask yourself:
+Pass all four sub-agents the list of files changed and the task or link to the spec. They return reports. Using the combined reports, ask yourself:
 1.  **Completeness**: Was every endpoint defined in "API Design" implemented?
 2.  **Compliance**: Were all "Goals" met? Were all "Non-Goals" avoided?
 3.  **Quality**: Are there any linting errors or obvious bugs?
 4.  **Consistency**: Does the code match the "Proposed Architecture"?
 
-> **If you find discrepancies:** Fix them now. Do not ask the user for permission to fix bugs. Once fixes are applied, send changes back to the specific sub-agent that raised that concern — independently, and only to that one. Use the same sub-agent instance, not a new one. If issues persist after this second pass, escalate to the user rather than looping further.
+Do not tell the reviewers their findings will be judged.
+
+#### Judge findings
+
+1. Merge the four reports. Remove duplicates. Set Taste aside, unactioned.
+2. Spawn one fresh general-purpose agent as judge. Pass it the findings and the changed files. It returns one verdict per finding:
+   - **confirmed** — reproduced (repro or failing test), rule applies, or the stated problem is real in the code. For race conditions: shared state, non-atomic read-then-write, concurrent callers possible, and no guard all hold; attempt a forced-interleaving test.
+   - **rejected** — it must point to the code that disproves the finding.
+   - **escalate** — depends on something outside the code (prod config, external service).
+3. Fix confirmed findings without asking. Send escalated ones to the user. List rejected ones with the judge's reason.
+
+After fixing, send the changes back to the reviewer that raised the finding — same instance. If issues persist after this second pass, escalate to the user.
 
 ### 2. QA Validation (After Clean Code Review)
 
 Determine which QA agents to spawn based on what the spec contains:
 
-| Spec contains | Agent to spawn | Mode |
+| Spec/task contains | Agent to spawn | Mode |
 |---|---|---|
-| **Figma References** section | UI validation sub-agent | UI validation only |
+| **Figma References** section, or a **Claude Design artifact** | UI validation sub-agent | UI validation only |
 | **QA Test Plan** section | Test plan execution sub-agent | Test plan execution only |
 | Both | Both sub-agents | Synchronously — test plan execution first, then UI validation |
 | Neither | — | Skip this step entirely, go to Step 3 |
@@ -51,10 +62,10 @@ Provide:
 #### Spawning the UI validation sub-agent
 
 Provide:
-- The spec file path so it can read the Figma references (fileKey and nodeId)
+- The spec file path so it can read the design references: Figma (fileKey and nodeId) or the Claude Design artifact link
 - The **local URL** where the implemented page or component is running — run the app to obtain it
 - The **feature-slug** used during implementation
-- The **Figma frame dimensions** (width × height) from the design context
+- The **design frame dimensions** (width × height) from the Figma design context or the Claude Design artifact
 - Explicit instruction: validate UI fidelity only — do not execute any test plan
 
 #### After QA agents return
@@ -77,6 +88,7 @@ Run the build and tests sequentially — build first, then tests, never in paral
 
 Report back to the caller:
 - The **code review report** (findings + what was fixed).
+- **Rejected findings** and **Taste**, with reasons — for tuning the reviewers.
 - The **QA validation report** (if QA ran) — include everything each agent(s) returned: pass/fail per criterion, any fixes applied, and the evidence they relayed (screenshots and API request/response observations from the QA agent(s)).
 - Confirmation that the build and tests pass.
 

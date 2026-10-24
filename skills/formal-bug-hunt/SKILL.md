@@ -1,6 +1,7 @@
 ---
 name: formal-bug-hunt
-description: Finds bugs in stateful or concurrent code by modelling it in Lean or TLA+, checking rules against the model, and reproducing every counterexample as a failing test on the real code. Use when asked to "formally verify", "model check", or "hunt for race conditions" in a flow.
+description: Finds bugs in stateful or concurrent code by modelling it in Lean or TLA+ and reproducing every counterexample as a failing test.
+disable-model-invocation: true
 ---
 
 The model and proofs are tools. The deliverable is failing tests and fixes on the real code.

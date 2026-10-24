@@ -3,9 +3,8 @@
 // from whatever the runtime provides, else installs them once into a shared /tmp
 // dir. Usage:
 //   node pixel-diff.mjs <impl.png> <ref.png> <out-mask.png> [threshold=0.15]
-// Never stretches: an exact integer-multiple pair is matched by shrinking the larger
-// image (k×k block average); any other size mismatch exits 3.
-// Prints JSON: { numDiff, pct, width, height, factor } and writes the diff mask to <out>.
+// Never rescales: both images must be the same size, else exits 3.
+// Prints JSON: { numDiff, pct, width, height } and writes the diff mask to <out>.
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -50,32 +49,6 @@ async function getDeps() {
   return await loadFrom(depsBase);
 }
 
-// Shrink by an exact integer factor, averaging each k×k block into one pixel.
-function downscale(PNG, src, k) {
-  const w = src.width / k, h = src.height / k;
-  const out = new PNG({ width: w, height: h });
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const sum = [0, 0, 0, 0];
-      for (let dy = 0; dy < k; dy++) {
-        for (let dx = 0; dx < k; dx++) {
-          const si = ((y * k + dy) * src.width + (x * k + dx)) * 4;
-          for (let c = 0; c < 4; c++) sum[c] += src.data[si + c];
-        }
-      }
-      const di = (y * w + x) * 4;
-      for (let c = 0; c < 4; c++) out.data[di + c] = Math.round(sum[c] / (k * k));
-    }
-  }
-  return out;
-}
-
-// Integer k where big is exactly k× small in both dimensions, else 0.
-function exactFactor(big, small) {
-  const k = big.width / small.width;
-  return Number.isInteger(k) && k >= 1 && big.height === small.height * k ? k : 0;
-}
-
 async function main() {
   const [implPath, refPath, outPath, thresholdArg] = process.argv.slice(2);
   if (!implPath || !refPath || !outPath) {
@@ -86,17 +59,13 @@ async function main() {
 
   const { PNG, pixelmatch } = await getDeps();
 
-  let impl = PNG.sync.read(readFileSync(implPath));
-  let ref = PNG.sync.read(readFileSync(refPath));
+  const impl = PNG.sync.read(readFileSync(implPath));
+  const ref = PNG.sync.read(readFileSync(refPath));
 
-  // Never stretch: shrink the larger image by an exact integer factor, or refuse.
-  let factor = 1;
-  if (exactFactor(ref, impl) > 1) ref = downscale(PNG, ref, (factor = exactFactor(ref, impl)));
-  else if (exactFactor(impl, ref) > 1) impl = downscale(PNG, impl, (factor = exactFactor(impl, ref)));
-  else if (exactFactor(ref, impl) !== 1) {
+  if (impl.width !== ref.width || impl.height !== ref.height) {
     console.error(
-      `size mismatch: impl ${impl.width}x${impl.height}, ref ${ref.width}x${ref.height} — not an exact multiple. ` +
-        'Set the viewport to the Figma frame size and re-capture.',
+      `size mismatch: impl ${impl.width}x${impl.height}, ref ${ref.width}x${ref.height}. ` +
+        'Set the viewport to the Figma frame size, and fetch the reference at the capture\'s devicePixelRatio.',
     );
     process.exit(3);
   }
@@ -107,7 +76,7 @@ async function main() {
   writeFileSync(outPath, PNG.sync.write(diff));
 
   const pct = Number(((numDiff / (width * height)) * 100).toFixed(2));
-  console.log(JSON.stringify({ numDiff, pct, width, height, factor }));
+  console.log(JSON.stringify({ numDiff, pct, width, height }));
 }
 
 main().catch((err) => {

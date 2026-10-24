@@ -42,4 +42,5 @@ Each smell reads *what it is → how to fix*; match it against the diff.
 - **Noisy Comment** — a comment that, read against the code beneath it, restates what that code already says, or is padded and wordy. → cut it; keep only short comments that explain *why*. If it explains *what*, fix the naming instead.
 - **Stale Comment** — a comment describing behaviour the code no longer has. → update it to match the code, or delete it; a confidently wrong comment costs more than no comment.
 - **Long Function** — a function doing too much, too large to grasp at once. → split it into smaller, focused functions.
+- **Hand-Rolled Transaction** — a sequence of writes that must all succeed or none must land, with partial failure handled by hand (cleaning up, checking whether the earlier write landed, reconstructing missing data). → wrap the sequence in a transaction.
 - **Magic Number / String** — a bare literal (number or string) with no name explaining what it means. → extract it to a named constant.

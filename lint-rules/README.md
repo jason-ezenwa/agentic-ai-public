@@ -19,10 +19,12 @@ asks for a judgement call, so it stays at `warn` and is never promoted.
 | [`no-optional-nullable-mismatch`](no-optional-nullable-mismatch.js) | Blocking | Members that are both optional and nullable (`foo?: T \| null`). |
 | [`no-hardcoded-tailwind-colors`](no-hardcoded-tailwind-colors.js) | Blocking | Tailwind color utilities that bypass the design tokens (`bg-white`, `text-black`, `bg-[#fff]`). Web only — it means nothing in a project with no JSX. |
 | [`no-inline-styles`](no-inline-styles.js) | Blocking | The JSX `style` attribute, in every form. Web only. |
-| [`no-noisy-comments`](no-noisy-comments.js) | Advisory | Comments longer than two lines (a `//` run, a block, JSDoc prose, or a wrapped JSDoc tag), comments that open by narrating a change (`Added`, `Fixed`, `This function`), and comments that cite a request (`as requested`, `per the spec`). One report per comment, listing every fault it has. |
+| [`no-noisy-comments`](no-noisy-comments.js) | Advisory | Comments longer than two lines (a `//` run, a block, or a wrapped JSDoc tag) or JSDoc summaries longer than three, comments that open by narrating a change (`Added`, `Fixed`, `This function`), and comments that cite a request (`as requested`, `per the spec`). One report per comment, listing every fault it has. |
 | [`no-await-waterfall`](no-await-waterfall.js) | Blocking | Two or more consecutive `await` statements in one block where a later one does not use an earlier result. Reported once per run, with the count. A run is made of awaits whose result is bound; a bare `await` (a gate), a multi-declarator declaration and an assignment into a member each end one. React and Next.js data-loading code only, decided by function name and export shape: components and hooks by name, exported `getServerSideProps` / `getStaticProps` / `generateMetadata` / `generateStaticParams` / `loader`, an exported `GET` in a route file (`app/**/route.*`, `pages/api/**`, whose default export counts too), and the default export of an `app/**/page.*`, `layout.*`, `template.*` or `default.*`. A component name needs a lowercase letter, so an all-caps one (`FAQ`, `CTA`) is not recognised — the trade that keeps the handler verbs out. `GET` is the only handler verb checked — `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD` and `OPTIONS` are left alone. Also skipped: `'use server'` functions and files, and every other function, since only the nearest enclosing function decides whether the code is data loading (a named inner component is checked, an anonymous callback is not), while `'use server'` is inherited by everything nested in it. Beyond route, page and layout filenames the rule has no notion of file location; it is in the web rule set so it does not run on a backend package. Web only. |
 | [`no-regexp-in-render`](no-regexp-in-render.js) | Blocking | A regex literal or `new RegExp(...)` (including `window.RegExp`) inside a function component or hook body, including nested callbacks. `useMemo` callbacks are exempt; class components are out of scope. Web only. |
 | [`no-static-io-in-route-handler`](no-static-io-in-route-handler.js) | Blocking | An `fs` read or a `fetch` of a fixed URL inside a Next.js route handler (`app/**/route.*`, `pages/api/**`). Web only. |
+| [`no-cross-module-model-access`](no-cross-module-model-access.js) | Blocking | A Mongoose model injected or registered outside the NestJS module that owns its schema: `@InjectModel(X.name)` / `@InjectModel(X)` and each `MongooseModule.forFeature([...])` / `forFeatureAsync([...])` entry, where `X` is a runtime import from another module's `*.schema` file. A file belongs to the nearest folder above it holding a `*.module.ts` (searched up to the `package.json` folder), so a nested folder with its own module file is a separate module. Types, enums and constants from a schema file are allowed — only model access is flagged. Relative imports only. Specs and integration test modules wire collections across modules on purpose; turn it off for them in the app config. NestJS / Mongoose only — in `mongooseRuleSet`. Fix: add the method you need to the owning module's service, export that service from its module, and import the module. |
+| [`no-untyped-mongoose-create`](no-untyped-mongoose-create.js) | Blocking | An object literal passed straight to a Mongoose model as a document: `new <model>({...})`, `<model>.create({...})` (every literal in the variadic form, or each literal element of an array), `<model>.insertMany([{...}])`. Options arguments are ignored. A model is a `*Model` identifier (`UserModel`), or a class field injected with `@InjectModel` or typed `Model<...>` / `PaginateModel<...>`. Queries (`find`, `updateOne`, ...) are not checked. Mongoose / NestJS only — in `mongooseRuleSet`. |
 
 Each rule file opens with a comment explaining why the rule exists and what it
 covers. Read it before installing the rule.
@@ -41,12 +43,14 @@ packages/eslint-rules/
     plugin.js
     no-adr-references.js
     no-await-waterfall.js
+    no-cross-module-model-access.js
     no-optional-nullable-mismatch.js
     no-hardcoded-tailwind-colors.js
     no-inline-styles.js
     no-noisy-comments.js
     no-regexp-in-render.js
     no-static-io-in-route-handler.js
+    no-untyped-mongoose-create.js
 ```
 
 In a single-app project, `eslint-rules/` at the root is enough — skip the
@@ -84,12 +88,14 @@ effect without touching any app config.
 ```js
 import { noAdrReferences } from './no-adr-references.js'
 import { noAwaitWaterfall } from './no-await-waterfall.js'
+import { noCrossModuleModelAccess } from './no-cross-module-model-access.js'
 import { noHardcodedTailwindColors } from './no-hardcoded-tailwind-colors.js'
 import { noInlineStyles } from './no-inline-styles.js'
 import { noNoisyComments } from './no-noisy-comments.js'
 import { noOptionalNullableMismatch } from './no-optional-nullable-mismatch.js'
 import { noRegexpInRender } from './no-regexp-in-render.js'
 import { noStaticIoInRouteHandler } from './no-static-io-in-route-handler.js'
+import { noUntypedMongooseCreate } from './no-untyped-mongoose-create.js'
 
 // Apps register this under the `local` namespace, so every rule here is
 // addressable as `local/<rule-name>` without the app config naming it.
@@ -99,12 +105,14 @@ export const eslintPlugin = {
   rules: {
     'no-adr-references': noAdrReferences,
     'no-await-waterfall': noAwaitWaterfall,
+    'no-cross-module-model-access': noCrossModuleModelAccess,
     'no-hardcoded-tailwind-colors': noHardcodedTailwindColors,
     'no-inline-styles': noInlineStyles,
     'no-noisy-comments': noNoisyComments,
     'no-optional-nullable-mismatch': noOptionalNullableMismatch,
     'no-regexp-in-render': noRegexpInRender,
     'no-static-io-in-route-handler': noStaticIoInRouteHandler,
+    'no-untyped-mongoose-create': noUntypedMongooseCreate,
   },
 }
 
@@ -135,6 +143,15 @@ export const webRuleSet = {
     'no-static-io-in-route-handler': 'warn', // blocking: promote to error once clean
   }),
 }
+
+// Everything shared, plus the rules that only mean something with Mongoose.
+export const mongooseRuleSet = {
+  ...sharedRuleSet,
+  ...namespaced({
+    'no-cross-module-model-access': 'warn', // blocking: promote to error once clean
+    'no-untyped-mongoose-create': 'warn', // blocking: promote to error once clean
+  }),
+}
 ```
 
 `index.js` re-exports the rules and the glue:
@@ -142,14 +159,22 @@ export const webRuleSet = {
 ```js
 export { noAdrReferences } from './no-adr-references.js'
 export { noAwaitWaterfall } from './no-await-waterfall.js'
+export { noCrossModuleModelAccess } from './no-cross-module-model-access.js'
 export { noHardcodedTailwindColors } from './no-hardcoded-tailwind-colors.js'
 export { noInlineStyles } from './no-inline-styles.js'
 export { noNoisyComments } from './no-noisy-comments.js'
 export { noOptionalNullableMismatch } from './no-optional-nullable-mismatch.js'
 export { noRegexpInRender } from './no-regexp-in-render.js'
 export { noStaticIoInRouteHandler } from './no-static-io-in-route-handler.js'
+export { noUntypedMongooseCreate } from './no-untyped-mongoose-create.js'
 
-export { PLUGIN_NAMESPACE, eslintPlugin, sharedRuleSet, webRuleSet } from './plugin.js'
+export {
+  PLUGIN_NAMESPACE,
+  eslintPlugin,
+  mongooseRuleSet,
+  sharedRuleSet,
+  webRuleSet,
+} from './plugin.js'
 ```
 
 ### 4. Severity
@@ -189,7 +214,8 @@ export default defineConfig([
 ])
 ```
 
-A NestJS/Node app — same shape, `sharedRuleSet` instead of `webRuleSet`:
+A NestJS/Node app — same shape, `sharedRuleSet` instead of `webRuleSet`, or
+`mongooseRuleSet` when it uses Mongoose:
 
 ```js
 export default tseslint.config(
@@ -199,7 +225,7 @@ export default tseslint.config(
       [PLUGIN_NAMESPACE]: eslintPlugin,
     },
     rules: {
-      ...sharedRuleSet,
+      ...sharedRuleSet, // or ...mongooseRuleSet
     },
   },
 )
@@ -349,7 +375,8 @@ Variants each rule must be tested against:
   (`{...props}`).
 - `no-noisy-comments` — a 3-line `//` run; a run split by a blank line (the
   2-line half valid, the 3-line half reported); a 3-line block comment; JSDoc
-  with 3 prose lines; JSDoc with a wrapped `@param`; each narration opener
+  with 4 prose lines; a 3-line `//` run and block next to a 3-line JSDoc
+  summary (the JSDoc allowance is not shared); JSDoc with a wrapped `@param`; each narration opener
   (`Added`, `Updated`, `Changed`, `Fixed`, `Removed`, `Refactored`, `Now`,
   `This function`, `This method`, `Here we`); each request marker
   (`as requested`, `per the spec`, `per your feedback`, `as discussed`,
@@ -358,7 +385,7 @@ Variants each rule must be tested against:
   (length + narration, length + marker, narration + marker on one line, all
   three) asserting the full message string; and the reported location of a
   `//` run. Valid: a 2-line run, a 1-line comment, JSDoc with 2 prose lines and
-  several single-line tags, JSDoc with no tags and 2 lines, a license header on
+  several single-line tags, JSDoc with 3 prose lines, JSDoc with no tags and 2 lines, a license header on
   line 1 longer than 2 lines, `Nowadays`/`Fixedpoint`, and marker text inside a
   string literal. Interior blank lines in a block or JSDoc comment do not count
   as content lines. This rule reports multiple faults in one message — the
@@ -417,11 +444,41 @@ Variants each rule must be tested against:
   somewhere other than `fs`, a local binding named `fs` that never came from the
   module, and the default export of an `app/**/route.*` file (only `pages/api`
   routes its default export).
+- `no-cross-module-model-access` — Mongoose/NestJS projects add it through
+  `mongooseRuleSet`. The cases lint real paths under
+  `fixtures/no-cross-module-model-access/`, whose module files the rule reads.
+  `@InjectModel(X.name)` and `@InjectModel(X)` with another module's schema
+  class; an aliased import; a `.schema.ts` specifier; `@InjectModel` on a class
+  property; a `forFeature` entry; a `forFeature` mixing an own and a foreign
+  entry, reporting the foreign one only; `forFeatureAsync`; a nested folder with
+  its own module file using its parent's schema; the parent using a nested
+  module's schema; and a file outside any feature module. Valid: the owning
+  module injecting and registering its own schema; a sub-folder without a
+  module file; two services in one module; another module's service;
+  `import type`; an inline `type` specifier; a schema class used only as a type;
+  an enum used in a DTO; a non-schema file; a package import; and an
+  `@InjectModel` naming a different class.
+- `no-untyped-mongoose-create` — Mongoose/NestJS projects add it through
+  `mongooseRuleSet`. `new` on an injected field; `create` with a literal;
+  variadic `create` with two literals reporting twice; `create([{...}])` and
+  `create([{...}], { session })` reporting once; `insertMany` with one literal
+  and one non-literal element reporting once; a bare `UserModel` with `new` and
+  `create`; an `@InjectModel` parameter with a neutral name; a `Model<...>`
+  parameter with no decorator; `PaginateModel<...>`; `@InjectModel` on a class
+  property; a class expression; an arrow callback inside a method; and
+  `new ...({...}).save()` reporting once. Valid: the typed-instance pattern;
+  non-literal arguments; options after a document or array (`create`,
+  `insertMany`); `new User({...})` on a schema class; `this.userModel` and
+  `this.aiModel` in a class with no hook; a lowercase `datamodel`; an
+  un-injected service field, alone and beside an injected one; a
+  `Repository<T>` field; `find`, `findOne`, `updateOne`, `deleteMany`; an inner
+  class whose field is not injected; and a `function () {}` callback, which
+  rebinds `this`.
 
 ## Adding a rule
 
-1. Add `<rule-name>.js` here, exporting the rule object. No imports — a rule
-   file stands alone, which is what makes it copyable. Open it with a comment
+1. Add `<rule-name>.js` here, exporting the rule object. No imports beyond
+   Node built-ins — a rule file stands alone, which is what makes it copyable. Open it with a comment
    saying why the rule exists; without that the next project re-litigates it.
 2. Add `<rule-name>.test.ts` beside it, covering every variant the rule catches
    and the near-misses that must stay valid, and make sure `npm test` passes.
