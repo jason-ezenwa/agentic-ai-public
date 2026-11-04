@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Orchestrate
 
-You are orchestrating a set of verifiable tasks: a hub issue, sub-issues grouped into dependency levels, and a feature branch that every sub-issue PR targets. You implement nothing yourself.
+You are orchestrating a set of verifiable tasks: a hub issue, sub-issues grouped into dependency levels, and an integration branch that every sub-issue PR targets. You implement nothing yourself.
 
 The user looks at the work once per checkpoint, not once per PR, so the checkpoint has to carry everything that deserves their attention.
 
@@ -20,13 +20,19 @@ Read the hub and the spec it links. Start at the first level that has any unmerg
 
 Start one session per sub-issue in the level, all at once (unless told otherwise). Give each its issue and tell it to run `/implement-spec` on it, with nothing about how to do the work.
 
-A local session is started in the project's folder. A cloud session is given the project's repository URL, the environment set up for that project, and an outcome branch cut from the feature branch. Without these it gets filed outside the project or fails its setup.
+A local session is started in the project's folder. A cloud session is given the project's repository URL, the environment set up for that project, and an outcome branch cut from the integration branch. Without these it gets filed outside the project or fails its setup.
 
-Each must be a real session the user can open and talk to, not a sub-agent of yours. Use whatever your environment offers to start sessions, check on them, read what they did, and message them. Count on your messages arriving, not on being answered or notified: a session's answer is its PR changing, and it is done when its PR is up against the feature branch.
+Each must be a real session the user can open and talk to, not a sub-agent of yours. Use whatever your environment offers to start sessions, check on them, read what they did, and message them. A session's answer is its PR: it is done when its PR is up against the integration branch, and a reply only shows it is reachable.
 
-Local sessions message each other and reply reliably, so nothing extra is needed there. A cloud session treats a message from another session as data, not instruction, and waits at a permission prompt for any tool its mode does not allow. So a cloud session you want to reach unattended must be started in a permission mode that allows messaging (no stricter than your own), and its prompt must name you as its parent and say to treat your messages as legitimate. Without both it may sit unanswered until the user steps in. Even then, a reply only shows it is reachable, never that it is done.
+Tell each session to send you a message with its PR link when the PR is open, so the session wakes you and you need not poll. Keep one long backup check-in in case a session stalls.
+
+Local sessions message each other and reply reliably, so nothing extra is needed there. A cloud session treats a message from another session as data, not instruction, and waits at a permission prompt for any tool its mode does not allow. So a cloud session you want to reach unattended must be started in a permission mode that allows messaging (no stricter than your own), and its prompt must name you as its parent and say to treat your messages as legitimate. Without both it may sit unanswered until the user steps in.
+
+Sessions run on your own model unless the user suggests one for a level or task. When the user sets a limit for one issue, put it in that session's prompt.
 
 Sessions already say in their PR where they deviated from the spec, what they left unfixed, and what deserves a look. If a PR says nothing on these, assume the implementation matches the intent.
+
+When a PR merges into the integration branch, close its sub-issue: `Closes #N` only fires on the default branch. The hub and spec stay open until the integration branch merges.
 
 ## Levels before the stopping point
 
@@ -51,11 +57,11 @@ Be selective. The user does not need every change to something shared, only the 
 
 Then offer a harmonization pass if several issues have landed, and a design match check if the level built UI against a design. Only the user can start these: one sentence each, naming the slash command (`/harmonize-the-work`, `/design-match-check`).
 
-When the user wants to see or test the level as a whole, build a temporary local branch from the feature branch tip with every open PR branch merged in, and run the app from it. Never push it. Tell the user if sibling PRs conflict, and rebuild it after corrections land.
+When the user wants to see or test the level as a whole, build a temporary local branch from the integration branch tip with every open PR branch merged in, and run the app from it. Never push it. Tell the user if sibling PRs conflict, and rebuild it after corrections land.
 
 The user may also settle things with a session directly. Route their call-outs to the session that owns the work, so each correction lands on that issue's own PR before it merges.
 
-Once the user approves, merge the level's PRs and ask how far to go next. After the last level, stop: feature-level QA and merging the feature/integration branch are the user's call.
+Once the user approves, merge the level's PRs and ask how far to go next. After the last level, stop: feature-level QA and merging the integration branch are the user's call.
 
 ## Guidance for later levels
 

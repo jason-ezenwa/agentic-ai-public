@@ -62,7 +62,7 @@ Ensure successful builds and lint checks. For lint fixes, fix them manually — 
 
 ### 4. Verification
 Once implementation and spot checks are complete, run the `/sub-agent-driven-verification`
-skill against the spec. Use its Code Review and QA reports in the PR.
+skill against the spec.
 
 > **Skip this step only if the caller has told you verification is handled separately** (e.g. an orchestrator that verifies after you). In that case, proceed straight to PR Creation.
 
@@ -73,7 +73,7 @@ Only once the build is clean and verification has passed (or was skipped), commi
 
 One commit covers the implementation and any fixes verification applied, in Conventional Commits format — the type must match the branch prefix.
 
-The PR body, omitting any section whose step was skipped:
+The PR body, omitting any section that doesn't apply:
 
 ```markdown
 Closes #<issue number>
@@ -81,14 +81,18 @@ Closes #<issue number>
 ## Summary
 <Concise description of what was achieved from the spec>
 
+## Test Plan
+<From the spec's verification section, if present>
+```
+
+Keep verification output out of the body. Once the PR exists, add it as **one comment** on the PR, omitting any section whose step was skipped:
+
+```markdown
 ## Code Review Report
 <Findings and what was fixed>
 
 ## QA Validation
 <If QA ran — concise report on QA and any fixes applied>
-
-## Test Plan
-<From the spec's verification section, if present>
 ```
 
 ### 6. Completion

@@ -53,3 +53,4 @@
 - Do they cover real edge cases rather than just the happy path?
 - Do test names describe observable behaviour?
 - Can each test fail? Flag tests that pass whatever the implementation does as a **Blocker**.
+- Does a test only prove that a removed approach stays removed (the old field is absent, the deprecated function isn't called)? Flag it unless it guards a bug that actually happened, as it adds test bloat. A redesign needs tests of the new behaviour.

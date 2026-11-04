@@ -1,6 +1,6 @@
 ---
 name: motion-video
-description: Makes a short motion-graphic video toward a goal (ad, launch, feature promo): brief, still frames for sign-off, one hero render for sign-off, then the outputs the goal needs. Use when asked to "make a video", "make an ad", or "animate this".
+description: Makes a short motion-graphic video toward a goal (ad, launch, feature promo) through a brief, still frames for sign-off, one hero render for sign-off, then the outputs the goal needs. Use when asked to "make a video", "make an ad", or "animate this".
 ---
 
 Every video serves a goal. Get to stills the user approves before any motion, and one approved hero before any variants.

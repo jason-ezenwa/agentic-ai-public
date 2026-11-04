@@ -36,7 +36,7 @@ Also surface:
 - The dependency order and levels across the set, grouped so parallelizable issues are obvious
 - Any requirements from the source spec you are deliberately excluding, and why
 - The source spec issue and the title of the issue-set hub that will be created
-- The **feature branch** all issue worktrees will branch off (propose `feat/<feature-slug>` derived from the spec slug; the user can override). This branch is the merge target for every issue PR — it is never merged into the default branch until QA has been done and the user explicitly triggers it.
+- The **integration branch** all issue worktrees will branch off (propose `feat/<feature-slug>` derived from the spec slug; the user can override). This branch is the merge target for every issue PR — it is never merged into the default branch until QA has been done and the user explicitly triggers it.
 
 Wait for the user to say "approved", "go ahead", "looks good", "proceed", or to send revisions. If they request changes, update the decomposition and re-propose. Do not skip this step even if the decomposition seems obvious — created GitHub issues can't be cleanly undone, only closed.
 
@@ -53,11 +53,11 @@ Create the hub first; every sub-issue attaches to it. The hub is the single plac
 
     #<spec-number>
 
-    ## Feature branch
+    ## Integration branch
 
     `feat/<feature-slug>`
 
-    All sub-issue worktrees branch off this. Every sub-issue PR targets this branch — **never the default branch**. The feature branch is only merged into the default branch once all sub-issues are merged and QA has passed.
+    All sub-issue worktrees branch off this. Every sub-issue PR targets this branch — **never the default branch**. The integration branch is only merged into the default branch once all sub-issues are merged and QA has passed.
 
     ## Dependency levels
 
@@ -140,7 +140,7 @@ After all sub-issues are created:
 - Each sub-issue appears under the hub's "Sub-issues" list (check via `gh api "/repos/<owner>/<repo>/issues/<hub-number>/sub_issues"`).
 - Each blocking relationship renders on the dependent issue's page.
 - The hub's Dependency levels table uses resolved `#N` references and its levels/order match the blocking relationships actually set via the API.
-- The hub body links the technical spec and records the feature branch.
+- The hub body links the technical spec and records the integration branch.
 - No circular dependencies (if the dependencies API accepted a cycle, revisit the decomposition).
 - Every sub-issue has an end-to-end verification path.
 
