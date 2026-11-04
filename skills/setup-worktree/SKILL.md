@@ -27,7 +27,7 @@ scripts/setup-worktree.sh <verb> <feature-description> [--spec <path>] [--base <
 | --spec \<path\> | No | relative path to a spec file to move into the worktree |
 | --base \<branch\> | No | branch to base the worktree off; overrides the auto-detected default branch. Created from the default branch (and pushed) if it doesn't exist yet |
 
-When `--base` is omitted the script auto-detects the default branch. Pass `--base` when the worktree should branch off a specific branch instead — for example a feature/integration branch when the work is a subset of a larger feature. The branch passed to `--base` does not need to exist yet: if it exists nowhere, the script creates it from the default branch and pushes it, so a not-yet-created branch is still a valid `--base` value.
+When `--base` is omitted the script auto-detects the default branch. Pass `--base` when the worktree should branch off a specific branch instead — for example an integration branch when the work is a subset of a larger feature. The branch passed to `--base` does not need to exist yet: if it exists nowhere, the script creates it from the default branch and pushes it, so a not-yet-created branch is still a valid `--base` value.
 
 ## Output
 

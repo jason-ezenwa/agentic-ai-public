@@ -19,7 +19,7 @@ Use an in-app browser tool if one is available. Otherwise, confirm `playwright-c
 3. **Mobile pass** — only once desktop feedback has been collected from the user and noted. Same as step 1, for every screen that has a distinct mobile design (a desktop screen made responsive without one isn't flagged as missing).
 4. **Mobile feedback** — collect call-outs from the user. Note them; don't fix yet.
 5. **Fix** — address every call-out from both passes.
-6. **Re-verify** — re-present the full scope side by side again: call-outs first (proving the fix landed), then the rest of the scope (proving nothing else regressed).
+6. **Re-verify** — re-present each call-out side by side (proving the fix landed). Then read the commit diff: if it changes anything beyond what was called out, also re-present the affected screens to show nothing else regressed. If it doesn't, show only the fixes.
 
 ## Presentation
 

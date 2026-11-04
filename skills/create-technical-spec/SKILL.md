@@ -50,9 +50,7 @@ Once the spec is published, the **issue body is the source of truth**. Make edit
 ---
 
 ## Overview
-**Product Context**: 1-2 sentences on WHAT we're building (link to product spec if any)
-**Technical Approach**: 2-3 sentences on HOW we'll build it
-**Key Technologies**: Languages, frameworks, databases, infrastructure
+Top-level, 1-2 sentences on WHAT we're building and why (link to product spec if any)
 
 ---
 
@@ -80,15 +78,15 @@ Each entry is a clickable Markdown link to the user-provided URL with a short la
 ---
 
 ## Current System
-**Existing Architecture**: Brief description or diagram of relevant current state
-**Limitations**: What doesn't work today
+**Summary**: 2-3 sentences on how the relevant part of the system works today (prose, not a diagram)
+**Gaps**: What the system doesn't do yet
 **What We'll Leverage**: Existing code, patterns, infrastructure we can reuse
 
 ---
 
 ## Proposed Architecture
 **Diagram**: High-level architecture showing major components and data flow
-**Component Overview**: Table of components, their technology, responsibility, scaling strategy
+**Component Overview**: Table of components and the change expected in each
 
 ---
 
@@ -120,32 +118,13 @@ For each major decision:
 ---
 
 ## Security
-- **Auth/Authz**: How users authenticate, what permissions exist
-- **Input Validation**: Server-side validation approach
 - **Data Protection**: Encryption at rest/transit, PII handling
 - **Security Testing**: OWASP checks, dependency scanning
 
 ---
 
-## Performance & Scale
-- **Targets**: Response time, throughput, uptime SLAs
-- **Optimization**: Caching strategy, database optimization, API efficiency
-- **Scaling**: How we scale horizontally/vertically, bottlenecks and mitigation
-
----
-
-## Error Handling & Reliability
-- **Error Categories**: User errors (4xx) vs system errors (5xx)
-- **Retry Strategy**: When to retry, backoff configuration
-- **Fallback Behavior**: What happens when dependencies fail
-
----
-
-## Monitoring
-- **Key Metrics**: Request rate, error rate, latency (with alert thresholds)
-- **Logging**: What to log, what NOT to log, retention
-- **Dashboards**: Links to system health and feature analytics dashboards
-- **Alerts**: Critical vs warning alerts and routing
+## Observability
+- **Logging**: Log the core parts of the change (key state transitions, external calls, failures) — not everywhere. Note what must NOT be logged (PII, secrets).
 
 ---
 
@@ -169,38 +148,6 @@ For each major decision:
 
 ---
 
-## Implementation Plan
-For each phase:
-- **Goal**: What we achieve in this phase
-- **Tasks**: Key work items
-- **Deliverables**: What's shipped
-- **Acceptance Criteria**: How we know it's done
-
----
-
-## Deployment
-- **Environments**: Dev, staging, production setup
-- **Process**: Automated steps from merge to production
-- **Feature Flags**: Gradual rollout strategy
-- **Rollback Plan**: When to rollback and how
-
----
-
-## Database Migrations
-For each migration:
-- **Forward**: Script to apply changes
-- **Rollback**: Script to undo changes
-- **Data Migration**: How to backfill/transform existing data
-- **Validation**: How to verify success
-
----
-
-## Operations & Runbook
-- **Common Operations**: Scaling, cache clearing, etc.
-- **Incident Response**: Symptoms, likely causes, first steps
-
----
-
 ## Dependencies & Risks
 - **External Dependencies**: Services we rely on, SLAs, fallback strategies
 - **Technical Risks**: Risk | Impact | Likelihood | Mitigation
@@ -211,6 +158,5 @@ For each migration:
 ## Documentation
 - [ ] API docs (Insomnia/OpenAPI/Swagger)
 - [ ] Architecture diagrams
-- [ ] Runbook for on-call
 - [ ] Developer guide
 ```
