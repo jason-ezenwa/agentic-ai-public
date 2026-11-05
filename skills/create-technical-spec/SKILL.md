@@ -9,35 +9,32 @@ This skill guides the creation of technical specification documents using a stan
 
 ## Instructions
 
-1.  **Analyze the Requirement**: Understand the feature or product being requested.
-2.  **Generate Content**: Use the template below to structure the document.
+1.  **Generate Content**: Use the template below to structure the document.
     -   **Flexible Application**: Not every use case requires every section of the template. Use your best judgment to determine which sections are relevant and necessary for the specific task. Omit sections that are not applicable.
-    -   **Professional Tone**: Maintain a clear, concise, and professional technical writing style.
-    -   **Figma Drives UI, Not Prose**: When Figma or other design references exist, link them and let the implementing agent read the design directly — don't describe colors, spacing, layout, or copy in prose. A wrong description in the spec risks being what gets implemented instead of the actual design. Describe UI details directly only when no Figma or design reference is provided.
+    -   **Figma Drives UI, Not Prose**: When Figma or other design references exist, link them and let the implementing agent read the design directly. Do not describe colors, spacing, layout, or copy in prose.
     -   **No Repetition**: Don't restate the same fact across sections. A repeat is fine when it adds new information (e.g. a code snippet backing up a rule already stated in prose); repeating the same information in the same form is not.
-3.  **Publish the Spec**: See **Publishing** below.
-4.  **QA Test Plan**: After the spec is published, propose a QA test plan to the user. Draft a suggested plan based on the spec's goals, API design, and any Figma references, then present it with the following structure:
+2.  **Publish the Spec**: See **Publishing** below.
+3.  **QA Test Plan**: After the spec is published, propose a QA test plan to the user. Draft a suggested plan based on the spec's goals, API design, and any Figma references, then present it with the following structure:
     - A brief summary of what will be tested
     - Step-by-step test scenarios (happy path first, then edge cases and error states)
     - Expected outcomes for each scenario
 
-    Ask the user to confirm, adjust, or skip the test plan. If confirmed or adjusted, add the finalised plan as a `## QA Test Plan` section to the issue (`gh issue edit <num> --body-file <new>`). If skipped, leave the section out — do not add a placeholder.
-5.  **Confirm Approval Status**: Once the spec is finalised, ask the user whether it is approved. If they approve, update the **Status** field in the spec from `Draft` to `Approved` (edit the issue accordingly). If it is not yet approved, leave the status as `Draft`.
+    Ask the user to confirm, adjust, or skip the test plan. If confirmed or adjusted, add the finalised plan as a `## QA Test Plan` section to the issue.
+4.  **Confirm Approval Status**: Once the spec is finalised, ask the user whether it is approved. If they approve, update the **Status** field.
 
 ## Publishing
 
 The spec is created directly as a GitHub issue on the current repo.
 
-1.  Confirm the working directory is inside a GitHub repo (`gh repo view`).
-2.  Ensure the `spec` label exists on the repo without overwriting an existing one: `gh label create spec --color 4C47EA --description "Technical or product spec that can be picked up by an agent" 2>/dev/null || true`. This creates the label if missing and is a no-op if it already exists (regardless of the existing color or description).
-3.  Generate the spec content using the template.
-4.  Write the body to a tempfile under `/tmp` (e.g. `/tmp/spec-<feature-name>-<timestamp>.md`). `/tmp` is cleared on reboot, so no manual cleanup is required.
-5.  Create the issue: `gh issue create --title "<Feature Name> Technical Spec" --label spec --body-file /tmp/spec-<feature-name>-<timestamp>.md`. The body's `# <Feature Name> Technical Spec` heading must match this title exactly.
-6.  Report the issue URL and number back to the user.
+1.  Ensure the `spec` label exists on the repo without overwriting an existing one.
+2.  Generate the spec content using the template.
+3.  Write the body to a tempfile under `/tmp`.
+4.  Create the labelled issue with title "<Feature Name> Technical Spec".
+5.  Report the issue URL and number back to the user.
 
 ## Editing After Creation
 
-Once the spec is published, the **issue body is the source of truth**. Make edits directly on the issue: write the updated body to a temporary file, cross-check it contains only the intended changes, then apply with `gh issue edit <num> --body-file <new>`.
+Once the spec is published, the **issue body is the source of truth**. Make edits directly on the issue: write the updated body to a temporary file, cross-check it contains only the intended changes, then update it.
 
 ## Technical Spec Template
 
