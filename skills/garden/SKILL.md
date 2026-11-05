@@ -20,14 +20,14 @@ Work gets done and it works, but it often looks messy. Gardening makes it look p
 
 **Types and constants**
 - They live in the types and constants files of their feature or sub-feature, never in services, controllers, utils, components or pages. That holds even when only one file uses them.
-- Name them `<feature>.types.ts` and `<feature>.constants.ts`, unless the app already names them differently. Inside a sub-feature they are `types.ts` and `constants.ts`.
+- Name them `<feature>.types.ts` and `<feature>.constants.ts`, unless the app already names them differently.
 
 **Core and sub-features**
 - The core of a module or feature (its module file, main controller, service or component, and their types and constants) stays at the top level, as do `dtos/` and `schemas/`.
 - Each clear sub-feature moves into its own folder, together with its tests, types and constants.
-- Files inside a sub-feature folder (or a nested folder below it) don't repeat that folder's name in their file name. When a file moves in, drop it: `refund/refund-request.service.ts` becomes `refund/request.service.ts`, and `refund/refund.service.ts` becomes `refund/service.ts`. Only the immediate folder's name is dropped. This doesn't apply to top-level feature folders.
+- A sub-feature can be split into sub-feature slices, one level and no further: `<feature>/<sub-feature>/<sub-feature-slice>/` is fine, a folder below that is not.
 - Group by sub-feature, not by kind of file.
-- A sub-feature can be split into folders once more, but no further: `<feature>/<sub-feature>/<sub-sub-feature>/` is fine, a folder below that is not.
+- When a file moves into a sub-feature or sub-feature slice folder, drop the names of the folders above it from its file name, but keep the folder's own name and the kind suffix: `payments/payments-refund-request.service.ts` becomes `payments/refund/refund-request.service.ts`, never `request.service.ts` or `service.ts`. Folders that only hold a kind of file (`components/`, `tests/`, `dtos/`) don't count. This doesn't apply to top-level feature folders.
 
 **Pages (React apps other than Next.js)**
 - `pages/` holds pages only. Components go to `features/<feature>/components/`, hooks to `features/<feature>/hooks/`, types and constants to `features/<feature>/`, and page tests to `features/<feature>/tests/`.

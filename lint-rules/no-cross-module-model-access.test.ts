@@ -17,7 +17,8 @@ const ruleTester = new RuleTester({
 })
 
 // Module folders in the fixture: src (app.module.ts), src/user, src/onboarding,
-// src/billing, and src/billing/invoices nested inside billing.
+// src/billing, src/billing/invoices nested inside billing, and src/inventory,
+// whose module and schema files are named bare (`module.ts`, `schema.ts`).
 const fixture = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
   'fixtures/no-cross-module-model-access/src',
@@ -91,6 +92,26 @@ ruleTester.run('no-cross-module-model-access', noCrossModuleModelAccess, {
       filename: at('onboarding/onboarding.service.ts'),
       code: `import { User } from '../user/user.schema'\nclass S { constructor(@InjectModel(Lead.name) private m: Model<LeadDocument>) {} }`,
     },
+    // a bare `schema.ts` registered by the module that owns it
+    {
+      filename: at('inventory/inventory.service.ts'),
+      code: `import { Stock } from './schema'\nclass S { constructor(@InjectModel(Stock.name) private m: Model<StockDocument>) {} }`,
+    },
+    // a sub-folder of a bare-named module belongs to that module
+    {
+      filename: at('inventory/stock/stock.service.ts'),
+      code: `import { Stock } from '../schema'\nclass S { constructor(@InjectModel(Stock.name) private m: Model<StockDocument>) {} }`,
+    },
+    // a file whose name merely ends in "schema" is not a schema file
+    {
+      filename: at('onboarding/onboarding.service.ts'),
+      code: `import { Stock } from '../inventory/myschema'\nclass S { constructor(@InjectModel(Stock.name) private m: Model<StockDocument>) {} }`,
+    },
+    // a bare schema file used only as a type
+    {
+      filename: at('onboarding/onboarding.service.ts'),
+      code: `import type { StockDocument } from '../inventory/schema'\nlet s: StockDocument`,
+    },
   ],
   invalid: [
     // the textbook case: InjectModel with another module's schema class
@@ -158,6 +179,24 @@ ruleTester.run('no-cross-module-model-access', noCrossModuleModelAccess, {
       filename: at('shared/audit.service.ts'),
       code: `import { User } from '../user/user.schema'\nclass S { constructor(@InjectModel(User.name) private m: Model<UserDocument>) {} }`,
       errors: [crossModule('User', 'user')],
+    },
+    // a bare `schema.ts` owned by a module whose file is a bare `module.ts`
+    {
+      filename: at('onboarding/onboarding.service.ts'),
+      code: `import { Stock } from '../inventory/schema'\nclass S { constructor(@InjectModel(Stock.name) private m: Model<StockDocument>) {} }`,
+      errors: [crossModule('Stock', 'inventory')],
+    },
+    // the same import written with its extension
+    {
+      filename: at('onboarding/onboarding.service.ts'),
+      code: `import { Stock } from '../inventory/schema.ts'\nclass S { constructor(@InjectModel(Stock.name) private m: Model<StockDocument>) {} }`,
+      errors: [crossModule('Stock', 'inventory')],
+    },
+    // forFeature registering a bare schema from another module
+    {
+      filename: at('onboarding/onboarding.module.ts'),
+      code: `import { Stock, StockSchema } from '../inventory/schema'\nMongooseModule.forFeature([{ name: Stock.name, schema: StockSchema }])`,
+      errors: [crossModule('Stock', 'inventory')],
     },
   ],
 })
