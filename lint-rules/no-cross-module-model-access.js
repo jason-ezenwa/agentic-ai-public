@@ -2,15 +2,15 @@
 // another module's data through that module's service. Flags model access built
 // from another module's schema:
 // `@InjectModel(X.name)` and `MongooseModule.forFeature([...])` entries.
-// A file belongs to the nearest folder above it holding a `*.module.ts`, so a
+// A file belongs to the nearest folder above it holding a `module.ts` or `*.module.ts`, so a
 // nested folder with its own module file is a separate module. Types, enums and
 // constants from a schema file are not model access and stay allowed.
-// NestJS / Mongoose specific, relative imports of `*.schema` files only.
+// NestJS / Mongoose specific, relative imports of `schema` and `*.schema` files only.
 
 import fs from 'node:fs'
 import path from 'node:path'
 
-const SCHEMA_SOURCE = /\.schema(\.[cm]?[jt]s)?$/
+const SCHEMA_SOURCE = /(^|[./])schema(\.[cm]?[jt]s)?$/
 const FOR_FEATURE_METHODS = new Set(['forFeature', 'forFeatureAsync'])
 
 const moduleDirCache = new Map()
@@ -23,7 +23,7 @@ function listDir(dir) {
   }
 }
 
-// The nearest folder holding a `*.module.ts`, searched up to the package root.
+// The nearest folder holding a `module.ts` or `*.module.ts`, searched up to the package root.
 function moduleDirOf(file) {
   let dir = path.dirname(file)
   const visited = []
@@ -35,7 +35,7 @@ function moduleDirOf(file) {
     }
     visited.push(dir)
     const entries = listDir(dir)
-    if (entries.some((entry) => entry.endsWith('.module.ts'))) {
+    if (entries.some((entry) => entry === 'module.ts' || entry.endsWith('.module.ts'))) {
       found = dir
       break
     }
