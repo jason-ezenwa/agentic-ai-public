@@ -6,8 +6,6 @@ Write one test for one behaviour → make it pass with minimal code → repeat. 
 
 The unit under test is a service method or utility function. Its "interface" is its inputs, return values, and thrown errors. Test those — not which internal methods were called.
 
-For test setup patterns, tooling, and mocking conventions, invoke the `/unit-testing` skill.
-
 ## Scope
 
 TDD applies to:

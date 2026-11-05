@@ -48,8 +48,7 @@
 
 ## 9. Test quality
 
-- If tests are present, consult `/unit-testing` if available to understand the conventions and patterns tests in this codebase should follow; non-compliance with those conventions is a finding.
-- Are they asserting on outcomes (return values, thrown errors) rather than implementation details (which methods were called, in what order)?
+- If tests are present, are they asserting on outcomes (return values, thrown errors) rather than implementation details (which methods were called, in what order)?
 - Do they cover real edge cases rather than just the happy path?
 - Do test names describe observable behaviour?
 - Can each test fail? Flag tests that pass whatever the implementation does as a **Blocker**.
