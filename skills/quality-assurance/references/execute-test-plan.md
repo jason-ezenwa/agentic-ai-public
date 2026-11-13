@@ -26,11 +26,14 @@ Work through scenarios independently. A failure in one scenario should not block
 
 When a scenario involves a pure API call with no UI, use `curl` via Bash. Do not open a browser for API-only scenarios. Refer to the authentication flows in the main `SKILL.md` for how to handle auth before making requests.
 
-Record the response status and body for each request, and compare against the expected outcome from the test plan.
+Compare each response against the expected outcome from the test plan.
 
-### 4. Screenshots
+### 4. Evidence
 
-Save any screenshots taken during execution to `/tmp/quality-assurance/<feature-slug>/test-plan-execution/`. Create the directory if it does not exist. Use descriptive filenames that identify the scenario and step (e.g., `checkout-step2-payment-form.png`).
+Save the evidence captured during execution to `/tmp/quality-assurance/<feature-slug>/test-plan-execution/`. Create the directory if it does not exist. Use descriptive filenames that identify the scenario and step.
+
+- **Screenshots**: e.g., `checkout-step2-payment-form.png`.
+- **API requests**: save the request, response status, and body for each call as a text file, e.g., `checkout-step2-post-orders.txt`.
 
 ### 5. Check for Errors
 
@@ -51,7 +54,7 @@ After exercising the feature, review console output and network activity for une
 **Expected**: [expected outcome from the test plan]
 **Actual**: [what actually happened]
 **Verdict**: PASS / FAIL
-**Evidence**: [screenshot or response captured]
+**Evidence**: [paths to the saved screenshots or request/response files]
 
 [Repeat for each scenario]
 

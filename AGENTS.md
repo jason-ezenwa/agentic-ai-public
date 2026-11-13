@@ -14,6 +14,10 @@ When verifying work, run build and test commands sequentially — never in paral
 
 In a monorepo, prefer a targeted build scoped to the app or service you touched over a global build. Check `package.json` scripts or the monorepo tool's filter syntax (e.g. `pnpm --filter <package> build`, `pnpm build:<target-app>`) for a scoped command. Only fall back to a global build if no targeted option exists.
 
+## Slack
+
+When interacting with Slack (reading channels or threads, searching, sending messages), use the `slack-hop` CLI tool.
+
 ## File naming and string casing
 
 Prefer kebab-case over camelCase, PascalCase, and snake_case for file names and string literals, including union type or enum values in TypeScript.

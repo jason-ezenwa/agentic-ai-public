@@ -11,6 +11,8 @@ A question belongs in the current round only if it is answerable now and indepen
 
 Each round reshapes the tree. Derive the next round from the new shape rather than from a list drawn up earlier.
 
+Do not send the next round until the current one is settled. If I reply with a question or pushback about something in the round, stay on that round: answer, discuss, and re-ask where needed. Move on only once every question in the round is settled and the discussion has wrapped up.
+
 If a question can be answered by exploring the codebase, answer it yourself instead of asking me. Delegate the lookup to a sub-agent and keep grilling while it works — the interview should never be blocked waiting on a fact. Fold the answer in when it lands, and let it reshape the next round if it changes anything.
 
 Keep this cheap: delegate only what genuinely needs exploring, and keep no more than a couple of lookups in flight. Anything a single grep would settle, settle yourself.
