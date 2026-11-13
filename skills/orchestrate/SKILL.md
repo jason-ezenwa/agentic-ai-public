@@ -55,13 +55,13 @@ At the level the user asked you to stop at, leave the PRs open and report:
 
 Be selective. The user does not need every change to something shared, only the ones the spec had not agreed or that carry real risk.
 
-Then offer a harmonization pass if several issues have landed, and a design match check if the level built UI against a design. Only the user can start these: one sentence each, naming the slash command (`/harmonize-the-work`, `/design-match-check`).
+Then offer a harmonization pass if several issues have landed. Only the user can start it: one sentence, naming the slash command (`/harmonize-the-work`).
 
 When the user wants to see or test the level as a whole, build a temporary local branch from the integration branch tip with every open PR branch merged in, and run the app from it. Never push it. Tell the user if sibling PRs conflict, and rebuild it after corrections land.
 
 The user may also settle things with a session directly. Route their call-outs to the session that owns the work, so each correction lands on that issue's own PR before it merges.
 
-Once the user approves, merge the level's PRs and ask how far to go next. After the last level, stop: feature-level QA and merging the integration branch are the user's call.
+Once the user approves, merge the level's PRs and ask how far to go next. After the last level, stop: feature-level QA and merging the integration branch are the user's call. If UI was built against a design, say in one sentence that `/design-match-check` is worth running once QA is done. Only the user can start it.
 
 ## Guidance for later levels
 
