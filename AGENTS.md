@@ -2,13 +2,15 @@
 
 ## Agent delegation
 
-- **Code reviews** → use `Ada - Reviewer` for feature correctness and `Jeffery - Reviewer` for code quality
-- **Quality assurance and validation** → use `Preye - QA Engineer` for UI validation and `Eren - QA Engineer` for test plan execution
-- **Feature design, architecture, or technical planning** → use the `Ezenwa - Senior Tech Lead` agent
+Delegate code review, QA and validation, and architectural second opinions to the matching custom agent rather than handling them inline. Choose the agent by its description. Anything else you handle yourself. When delegating, provide the task and relevant file paths only — do not specify how the agent should approach its work, which rules to apply, or which patterns to follow. Agents are already primed with their own instructions and will discover what they need from the workspace.
 
-These kinds of work go to their agent rather than being handled inline; anything else you handle yourself. When delegating, provide the task and relevant file paths only — do not specify how the agent should approach its work, which rules to apply, or which patterns to follow. Agents are already primed with their own instructions and will discover what they need from the workspace.
+## Writing tests
 
-## Validating work done
+Tests assert behaviour, not implementation. Test each behaviour once, at the lowest level that can prove it. Pure logic and algorithms are unit tests. Anything that crosses a boundary (persistence, queues, another module, or a component calling an API) is proven at the integration level.
+
+Don't mock our own code. Use real infrastructure, and mock external services only at the network layer (e.g. MSW). The only exceptions are time and randomness, failure injection that real infrastructure can't trigger, and running queues inline. Anything else that seems to need a mock is a design smell.
+
+## Verifying work done
 
 When verifying work, run build and test commands sequentially — never in parallel. Complete each command and review its output before starting the next. The order is: build first, then each test suite one at a time.
 
@@ -28,8 +30,3 @@ Prefer kebab-case over camelCase, PascalCase, and snake_case for file names and 
 ## Commit messages and PR titles
 
 Use Conventional Commits format: `<type>(<optional scope>): <short description>`
-
-Types: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `style`, `perf`, `ci`
-
-- `feat(auth): add OAuth2 login flow`
-- `fix(api): handle null response from user endpoint`

@@ -126,12 +126,10 @@ For each major decision:
 ---
 
 ## Testing
-- **Unit Tests**: Pure logic, code branching, validation at the DTO layer, algorithms.
+- **Unit Tests**: Pure logic and algorithms with no I/O, and validation at the DTO layer.
 - **Integration Tests**: API contract, persistence, side effects, frontend data flow, background work.
 - **E2E Tests**: Critical user flows.
 - **Performance Tests**: Load/stress/soak test scenarios.
-
-Tests assert behavior, not implementation. Test each behavior once, at the lowest level that can prove it.
 
 ---
 
