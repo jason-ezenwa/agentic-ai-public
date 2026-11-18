@@ -1,4 +1,4 @@
-// Enforces the type-safe-db-item-creation rule: an object literal handed to a
+// Enforces type-safe document creation: an object literal handed to a
 // Mongoose model (`new Model({...})`, `.create({...})`, `.insertMany([{...}])`)
 // is not checked against the document type, so a missing or misspelled field
 // reaches the database. Build a typed instance and assign its fields instead.
