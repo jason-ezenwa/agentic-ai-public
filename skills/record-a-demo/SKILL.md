@@ -1,6 +1,6 @@
 ---
 name: record-a-demo
-description: Records a polished, human-paced video walkthrough of an already-built, QA'd feature so it can be reviewed, signed off on, or shared with a colleague. Use when asked to "record a demo of X", "record a demo of what you just worked on", or to show how a flow works end to end. This is a presentation of working software — not pass/fail testing.
+description: Records a polished, human-paced video walkthrough of an already-built, QA'd feature so it can be reviewed, or shared with a colleague. Use when asked to "record a demo of X", "record a demo of what you just worked on", or to show how a flow works end to end.
 ---
 
 # Record a Demo
@@ -8,15 +8,14 @@ description: Records a polished, human-paced video walkthrough of an already-bui
 > All paths are relative to the skill's base directory provided when you load the skill.
 
 This skill produces a **video** of someone using the app, going through one or
-more scenarios, the way a person would present a finished feature to an
-audience. The premise is that the work is **already done and QA'd** — you are
-not testing whether it works, you are *showing* it working so the reviewer can
-sign off or request changes. It is also multipurpose: use it whenever the goal
-is to show how something already works to a colleague.
+more scenarios, the way a person would present a finished feature. The work is
+**already done and QA'd**: you are *showing* it working so a reviewer can sign
+off or request changes, not testing it. Use it whenever the goal is to show a
+colleague how something already works.
 
-**This is a demo, not QA.** Do not narrate a checklist of assertions, do not
-hunt for bugs, do not produce a pass/fail verdict. Move through the app
-deliberately, as if someone is watching and following along.
+**This is a demo, not QA.** No checklist of assertions, no bug hunting, no
+pass/fail verdict. Move through the app deliberately, as if someone is watching
+and following along.
 
 ---
 
@@ -43,150 +42,91 @@ deliberately, as if someone is watching and following along.
 
 ### 1. Resolve the scenarios
 
-Scenarios can come from anywhere. Resolve them in this priority order:
-
-1. **Explicit instruction** — a specific flow or "kind of demo" you were asked
-   for (e.g. "demo how authentication works", "show the payment checkout").
-2. **A named source read for content only** — a test plan, a technical spec, or
-   a curated plan the user points at. Extract the scenarios from it; ignore any
-   pass/fail framing.
-3. **The work just done in context** — when asked to "record a demo of what you
-   just worked on", derive the scenarios from the feature you implemented.
+Take them from, in priority order: an explicit instruction ("demo how
+authentication works"); a named source such as a test plan or spec, read for
+content only (ignore any pass/fail framing); or the work just done in context.
 
 ### 2. Confirm a short outline, then record
 
 Draft a brief **3–6 step outline** of what the demo will show and present it to
-the user for a quick confirm or edit before recording. This is the one
-checkpoint — cheap insurance that the demo matches intent. Once confirmed,
-proceed without further check-ins.
+the user for a quick confirm or edit. This is the one checkpoint. Once
+confirmed, proceed without further check-ins.
 
 ### 3. Explore the flow (playwright-cli)
 
 Drive the app interactively with **`playwright-cli`** to confirm the real flow
-*before* you record anything — this reconnaissance is what tells the recording
-script exactly what to target. Nail down: the entry URL, the auth steps, the
-exact locators, any waits or dynamic content, and the **bounding box** of any
-element you'll anchor a label to (`--raw eval "el => JSON.stringify(el.getBoundingClientRect())" <ref>`).
-Capture the working selectors and steps (the scratch pad is a good place for
-these). See the [playwright-cli manual](references/playwright-cli.md) for the
-command set.
+*before* you record anything. Nail down the entry URL, the auth steps, the exact
+locators, any waits or dynamic content, and the **bounding box** of any element
+you'll anchor a label to
+(`--raw eval "el => JSON.stringify(el.getBoundingClientRect())" <ref>`). Note
+the working selectors and steps (the scratch pad is a good place).
 
 ### 4. Author and run the recording script
 
 The demo is recorded by a `page.screencast` script that re-performs the flow you
-just confirmed. The exploration is what the script is built from — its locators,
-its actions, its label-anchor boxes. Run in one process, the script drives a
-**synthetic cursor** the viewer can follow, inserts natural pauses between
-actions, and adds occasional **small colour-coded labels** via the
-`page.screencast` API.
+just confirmed, using its locators, actions and label-anchor boxes. It drives a
+**synthetic cursor** the viewer can follow, pauses naturally between actions, and
+adds occasional small colour-coded labels. See **Recording techniques**.
 
-1. **From the exploration**, take the locators, actions, and label-anchor
-   boxes you noted in step 3 — that's the script's target list.
-2. **Write the script to a file** under the feature dir. Inject the synthetic
-   cursor and drive it with `show()` / `glide()`; type with
-   `pressSequentially({ delay: ~60 })` and pause with `waitForTimeout`. Keep
-   overlays **small, colourful and contextual** — short colour-coded labels
-   placed at the action via `showOverlay` (no outline boxes, no full-page chapter
-   cards). See **Recording techniques** for the full mechanics.
-3. **Run it:** start the browser daemon once with `playwright-cli open`, then
-   `playwright-cli run-code --filename=/tmp/demos/<feature-slug>/perform.js`. The
-   script file must start with the bare `async page =>` (no leading comment) and
-   be ASCII-only.
+1. Write the script to a file under the feature dir. It must start with the bare
+   `async page =>` and be ASCII-only.
+2. Start the browser daemon once with `playwright-cli open`, then run
+   `playwright-cli run-code --filename=/tmp/demos/<feature-slug>/perform.js`.
 
-> **Lighter alternative.** For a throwaway clip where authoring a script isn't
-> worth it, you can skip it and drive natively with recording on (`video-start`
-> → steps → `video-stop`, `video-show-actions` for callouts). Use this only for a
-> rough capture — the script is the method for a demo meant for sign-off. See
-> **Quick native capture** below.
+> **Lighter alternative.** For a throwaway clip, skip the script and drive
+> natively with recording on (`video-start` → steps → `video-stop`,
+> `video-show-actions` for callouts). Recording rolls in real time, so it
+> captures command latency and can't pace typing: fine for a rough capture,
+> not for a sign-off demo.
 
-### 5. Verify the take before delivering
+### 5. Deliver
 
-You captured **key-beat screenshots** during the run (see techniques). Review
-them to confirm the flow rendered correctly — the synthetic cursor is visible and
-on target, each beat reached its expected state, no error screens, content
-loaded. Note that `page.screenshot()` captures the cursor (it's DOM) but **not**
-the screencast overlays (those live in the video layer) — to check an overlay,
-extract a frame from the `.webm` with the bundled ffmpeg (see below). If the take
-is visually wrong, re-record. Only deliver a take you have eyes-on confirmed.
-
-### 6. Deliver
-
-Save the final `.webm` under the convention path (below), convert it to
-`.mp4`, and **surface the `.mp4` to the user** using whatever file-delivery
-capability is available in the session,
-alongside a short summary: which scenarios were demoed, the outline followed,
-and the file path(s). Invite sign-off or modification requests. Do not block on
-a tool that may not exist — if no delivery capability is available, report the
-paths plainly.
+Save the final `.webm` under the convention path (below), convert it to `.mp4`,
+and **surface the `.mp4` to the user** with whatever file-delivery capability the
+session has, alongside a very short summary. Don't restate all that was done.
 
 ---
 
-## Clip structure — group intelligently
+## Clip structure
 
-When a demo spans multiple scenarios, decide structure by **narrative
-coherence**, not a fixed rule:
-
-- Scenarios that share state or form one continuous journey → record as **one
-  continuous take**.
-- Independent scenarios that don't flow into each other → record as
-  **separate clips**, one per scenario.
-
-Use judgment. A sign-in → dashboard → editor → action sequence is one journey.
-"How auth works" and "how checkout works" are two separate clips.
-
----
+Scenarios that share state or form one journey (sign-in → dashboard → editor →
+action) are **one continuous take**. Independent scenarios ("how auth works",
+"how checkout works") are **separate clips**.
 
 ## When a take doesn't go cleanly
 
-The premise is that the feature works. Reality sometimes disagrees:
-
 - **Flaky / transient** (a missed wait, a stale locator, a timing blip) →
   silently re-take. These are recording problems, not feature problems.
-- **A real regression** (the feature is actually broken) → **stop**. Do **not**
-  deliver a misleading "it works" video, and do **not** fix the
-  implementation — this is record-a-demo, not implement. Report exactly what
-  failed and where, and let the user decide.
-
----
+- **A real regression** (the feature is actually broken) → **stop**. Do not
+  deliver a misleading "it works" video, and do not fix the implementation (this
+  is record-a-demo, not implement). Report exactly what failed and where, and let
+  the user decide.
 
 ## Output convention
 
-All demo artifacts go under a namespaced, per-feature directory:
-
 ```
 /tmp/demos/<feature-slug>/
-  <scenario-slug>.webm                 # the demo video(s)
-  <scenario-slug>__<beat>.png          # key-beat verification screenshots
+  <scenario-slug>.webm   # the demo video(s)
 ```
 
-Derive `<feature-slug>` the same way the scratch-pad skill does: the spec
-filename without extension, or a kebab-case name from the task description.
-`<beat>` is a short kebab-case label for the moment (e.g. `post-login`,
-`dashboard`, `chat-panel-open`, `message-sent`). Create the directory if it
-does not exist. After recording, convert the `.webm` to an H.264 `.mp4` and
-deliver that (Playwright's ffmpeg can't; use the one from Python's
-`imageio-ffmpeg` package).
+Derive `<feature-slug>` from the spec name
+without extension, or a kebab-case name from the task description. Convert the `.webm` to an H.264 `.mp4` and deliver that (Playwright's ffmpeg can't; use the one from Python's `imageio-ffmpeg` package).
 
 ---
 
 ## Recording techniques
 
-The demo is recorded by a `page.screencast` script. A **synthetic cursor** the
-viewer can follow carries the demo; small **colour-coded** screencast labels add
-the occasional caption of what's happening. Both are captured in the recording.
-
 ### Synthetic cursor + click ripple
 
-Headless video renders **no real mouse cursor**, so a viewer can't see where the
-action is. Inject a DOM cursor via `page.addInitScript` (re-runs on every
-navigation) and drive it alongside the real Playwright mouse so genuine
-hover/click events still fire.
+Headless video renders **no real mouse cursor**, so inject a DOM cursor via
+`page.addInitScript` (re-runs on every navigation) and drive it alongside the
+real Playwright mouse so genuine hover/click events still fire.
 
-Two things make this robust in practice: drive the app with **real navigations
-(`page.goto`)**, not `page.setContent` — setContent replaces the body *after* the
-init script runs and wipes the appended cursor. And guard the mount with a
-`MutationObserver` + an `ensure()` that re-appends the dot if a SPA re-render
-removes it, persisting the last position so it reappears where it was.
+Two things make it robust: drive the app with **real navigations (`page.goto`)**,
+not `page.setContent`, which replaces the body *after* the init script runs and
+wipes the cursor. And guard the mount with a `MutationObserver` + an `ensure()`
+that re-appends the dot if a SPA re-render removes it, persisting the last
+position.
 
 ```js
 await page.addInitScript(() => {
@@ -237,8 +177,8 @@ await page.addInitScript(() => {
 });
 ```
 
-Drive it with paced primitives — glide between targets and ripple on click, so
-the cursor does the explaining and overlays stay rare:
+Drive it with paced primitives: glide between targets and ripple on click, so
+the cursor does the explaining and overlays stay rare.
 
 ```js
 const pause = (ms) => page.waitForTimeout(ms);
@@ -255,7 +195,7 @@ async function glide(x, y, steps = 24) {
   }
 }
 
-// Move to an element by role+name, ripple, then click — resolve at action time.
+// Move to an element, ripple, then click. Resolve the locator at action time.
 async function show(locator) {
   await locator.scrollIntoViewIfNeeded();
   const box = await locator.boundingBox();
@@ -265,60 +205,45 @@ async function show(locator) {
   await page.evaluate(([x, y]) => window.__ripple(x, y), [x, y]);
   await locator.click();
 }
-
-// A key beat: settle, screenshot for verification, give the viewer a moment.
-async function beat(name, settleMs = 1600) {
-  await pause(settleMs);
-  await page.screenshot({ path: `${DIR}/${SLUG}__${name}.png` });
-}
 ```
 
 ### The recording script
 
-Author one function and run it with `playwright-cli run-code --filename script.js`.
-The argument is a single `async page => { ... }` (no import/require) — the cursor
-injection and the helpers above live inside this same function. Inject the cursor
-first, navigate to the entry screen and let it settle, start the screencast, then
-open with a cursor move (see *Open with motion* below), and perform the flow with
-`show()` / `glide()`. Overlays are `pointer-events: none`, so they never block
-interaction.
+One `async page => { ... }` (no import/require), run with
+`playwright-cli run-code --filename script.js`. The cursor injection and helpers
+above live inside it. Inject the cursor, navigate to the entry screen and let it
+settle, start the screencast, then perform the flow with `show()` / `glide()`.
+Overlays are `pointer-events: none`, so they never block interaction.
 
 > **Two `run-code --filename` gotchas (both bite on the first run):**
-> 1. **The file must begin with the bare `async page =>`** — a leading comment,
+> 1. **The file must begin with the bare `async page =>`.** A leading comment,
 >    blank line, or any non-ASCII character before it makes the parser choke
->    (e.g. `Unexpected token ';'`). Keep all comments *inside* the function body,
->    and keep the whole file ASCII.
+>    (e.g. `Unexpected token ';'`). Keep comments *inside* the function body and
+>    the whole file ASCII.
 > 2. **Open the browser daemon first.** `run-code --filename` runs against the
 >    live daemon page, so call `playwright-cli open` once before it, or it errors
 >    `Browser 'default' is not open`.
 
 ```js
-// /tmp/demos/<feature-slug>/perform.js — run: playwright-cli run-code --filename=/tmp/demos/<feature-slug>/perform.js
 async page => {
-  const DIR = '/tmp/demos/<feature-slug>', SLUG = '<feature-slug>';
-  await page.addInitScript(/* synthetic cursor — see "Synthetic cursor" above */);
-  const pause = (ms) => page.waitForTimeout(ms);
-  async function glide(x, y, steps = 24) { /* … see above … */ }
-  async function show(locator) { /* glide → ripple → click — see above */ }
-  async function beat(name, ms = 1600) { await pause(ms); await page.screenshot({ path: `${DIR}/${SLUG}__${name}.png` }); }
+  const DIR = '/tmp/demos/<feature-slug>';
+  // cursor init script, pause(), glide() and show() go here, copied from above
+  await page.addInitScript(/* synthetic cursor */);
 
-  // Load and SETTLE the entry screen BEFORE recording starts, so frame one is the
-  // fully rendered page (no half-painted load flash).
+  // Load and settle the entry screen BEFORE recording, so frame one is fully rendered.
   await page.goto('https://app.example.com/login');
   await page.getByRole('textbox', { name: 'Email' }).waitFor({ state: 'visible' });
 
   await page.screencast.start({ path: `${DIR}/<scenario-slug>.webm`, size: { width: 1280, height: 800 } });
 
-  // Open with a cursor move, not a static hold (see "Open with motion").
   await show(page.getByRole('textbox', { name: 'Email' }));   // cursor glides in immediately
   await page.getByRole('textbox', { name: 'Email' }).pressSequentially('user@example.com', { delay: 60 });
   await page.getByRole('textbox', { name: 'Password' }).pressSequentially('secret', { delay: 60 });
-  await show(page.getByRole('button', { name: 'Sign in' }));   // cursor glides → ripple → click
+  await show(page.getByRole('button', { name: 'Sign in' }));  // glide → ripple → click
   await page.waitForURL('**/dashboard');
-  await beat('post-login');                                     // key-beat screenshot
+  await pause(1600);                                          // let the viewer absorb the screen
 
-  // A small COLOUR pill placed AT the action — no outline box (the cursor shows
-  // where), no full-page card. Anchored from the target's box.
+  // A small colour pill placed AT the action, anchored from the target's box.
   const wb = await page.getByText('Welcome back').boundingBox();
   await page.screencast.showOverlay(
     `<div style="position:absolute;top:${wb.y - 34}px;left:${wb.x}px;padding:8px 14px;
@@ -326,150 +251,77 @@ async page => {
       box-shadow:0 4px 14px rgba(0,0,0,0.25);">Your dashboard</div>`,
     { duration: 1800 });
 
-  // ... continue the flow with show()/glide(), capturing beats ...
+  // ... continue the flow with show()/glide() ...
 
   await page.screencast.stop();   // finalizes the .webm at the path above
 }
 ```
 
-Overlay API: `showOverlay(html, { duration? })` for labels/callouts
-(returns a disposable when no `duration` is given); `showChapter(title, { description?, duration?, styleSheet? })`
-for a full-page section card; `hideOverlays()` / `showOverlays()` to toggle. The
-script writes the `.webm` directly to the path in `screencast.start`/`stop` — no
-random-name rename step.
+### Labels
 
-**Annotate with small, colourful, contextual labels — not boxes or full-page
-cards.** The cursor shows *where* the action is; a label adds *what's happening*
-and *what state it's in*. Keep them small, place them at the action, and let
-colour do the talking.
+`showOverlay(html, { duration? })` adds labels (it returns a disposable when no
+`duration` is given); `showChapter(title, { description?, duration?, styleSheet? })`
+adds a full-page card; `hideOverlays()` / `showOverlays()` toggle them. The
+cursor shows *where* the action is; a label adds *what's happening* and *what
+state it's in*.
 
-- **Small colour pills, placed at the action.** A short text label — ~13–14px,
-  `padding: 8px 14px`, `border-radius: 10px` (or `999px` for a pill), white text,
-  a soft shadow `0 4px 14px rgba(0,0,0,0.25)` — positioned from the target's
-  `boundingBox()` so it sits right by what's happening (e.g. a status pill just
-  above the chat input), not pinned to a generic corner. Background alpha
-  ~0.85–0.92 so it sits *on* the UI without hiding it.
-- **Encode state in colour** so the clip reads with the sound off and the text
-  unread: neutral/context → slate `rgba(17,24,39,0.85)`; in-progress/working →
-  your app's primary hue or indigo `rgba(79,70,229,0.92)`; done/success →
+- **Small colour pills, placed at the action**, positioned from the target's
+  `boundingBox()` (not pinned to a generic corner), with background alpha
+  ~0.85–0.92 so they sit on the UI without hiding it.
+- **Encode state in colour** so the clip reads with the sound off: neutral →
+  slate `rgba(17,24,39,0.85)`; in-progress → indigo `rgba(79,70,229,0.92)`; done →
   emerald `rgba(16,185,129,0.92)` with a ✓.
-- **Track the action's lifecycle.** For something that runs — a streaming reply,
-  a save — show the in-progress pill as a disposable, keep it up while it runs,
-  then `dispose()` it the moment your completion signal fires and flash a short
-  success label (`{ duration: ~2400 }`). The **working→done colour shift** (an
-  indigo pill while it streams → a green "✓ done" when it settles) is the single
-  highest-leverage annotation: it tracks the one state change that matters.
+- **Track the lifecycle** of anything that runs (a streaming reply, a save): keep
+  the in-progress pill up while it runs, `dispose()` it when your completion
+  signal fires, and flash a short success label (`{ duration: ~2400 }`). The
+  working→done colour shift is the highest-leverage annotation.
 
-**Don't:** draw outline boxes around elements (the cursor already shows where the
-action is); pin every label to one corner (reads as static chrome bolted to the
-frame); or blur the whole page with a `showChapter` card. A full-page card is a
-hard interrupt that halts all motion — use one *at most* as a title card on a
-cold open, never mid-flow. Let the cursor, pacing, and a few well-placed colour
-pills do the narrating.
+**Don't** draw outline boxes (the cursor already shows where), pin every label to
+one corner, or use a `showChapter` card mid-flow: it halts all motion. At most,
+use one as a title card on a cold open.
 
-### Quick native capture (alternative)
+### Open with motion
 
-For a throwaway clip where authoring a script isn't worth it, drive the flow with
-recording on — no script.
+A rendered page that sits motionless reads as a frozen tab. Put motion on screen
+immediately:
 
-Recording rolls in real time, so it captures the latency between commands and
-can't finely pace typing — fine for a rough capture, not for a sign-off demo.
-Insert pauses with `run-code "async page => { await page.waitForTimeout(900); }"`,
-and capture key-beat screenshots with `screenshot --filename=` as verification
-evidence.
-
-### Open with motion — no frozen start
-
-The most common way a demo opens badly isn't a blank frame — it's a **rendered
-page that sits motionless** for the first beat or two. The screen is correct, but
-nothing moves, so those opening seconds read as a screenshot or a frozen/hung
-tab, and the viewer can't tell the recording is live until something finally
-happens. The fix is to put **visible motion on screen almost immediately** after
-recording starts:
-
-- **Lead with a cursor move, not a pause.** Don't follow `screencast.start()` with
-  a static `waitForTimeout` on the still page. Make the first thing after `start()`
-  a `glide()`/`show()` onto the first target so the cursor visibly travels in
-  right away. Motion in the first ~300–500ms is what tells the viewer it's live.
-- **Don't start typing or acting while the cursor sits parked.** Typing into a
-  field the cursor never moved to still looks half-frozen — glide to the target
-  first, then act.
-- **Keep any pre-action settle minimal.** A short hold to avoid opening mid-jump
-  is fine, but a multi-second motionless hold at the top is the frozen look to
-  avoid. Absorb-the-screen pauses belong at *later* beats (`beat()`), not before
-  the first action.
-- **Have the page rendered before recording starts.** `goto` the entry URL and
-  `waitFor` a key element **before** `screencast.start()` (as the sample does),
-  so the open isn't also fighting a half-painted load — then lead in with motion.
+- Make the first thing after `screencast.start()` a `glide()`/`show()` to the first target, not a pause.
+- Glide to a field before typing into it; typing while the cursor sits parked looks half-frozen.
+- Render the entry page before recording starts (`goto`, then `waitFor` a key element) so the open isn't a half-painted load.
+- Keep any pre-action settle minimal; longer pauses belong at later beats.
 
 ### Pacing
 
-The human feel comes mostly from **deliberate pauses between actions**, not from
-dragging out the typing. A *moderate* per-character delay reads as natural typing —
-`pressSequentially({ delay: ~60 })` — so don't crank the delay higher to seem
-"human", and use `fill` when the typing itself isn't the point. Target
-~800–1200ms between ordinary steps and ~1500–2500ms at key beats so the viewer can
-absorb a new screen. Don't add latency for its own sake — pace it like a confident
-presenter, not a slideshow.
+The human feel comes from **deliberate pauses between actions**, not slow typing.
+Use `pressSequentially({ delay: ~60 })` (or `fill` when the typing isn't the
+point), ~800–1200ms between ordinary steps, and ~1500–2500ms at key beats.
 
 ### Streaming UIs (SSE / websockets)
 
-Apps with a long-lived streaming connection — an AI chat that streams its reply
-over SSE, a live agent loop — are fine to demo **in full**. The recording
-captures the page continuously in real time, so the whole generation is recorded
-as it happens. Showing the complete response is the goal — do **not** truncate or
-cut the stream short. What you must avoid is a *blocking* call that stalls on a
-static screen — the stall, not the stream's length, is the glitch.
+Demo a streaming reply **in full**: the recording captures it in real time, so
+don't truncate it. What to avoid is a *blocking* call that stalls on a static
+screen.
 
-- **Don't wait for network-idle — that's the actual trap.** A streaming
-  connection stays open, so network-idle never arrives:
-  `page.waitForLoadState('networkidle')` and `goto`/`waitFor` with
-  `waitUntil: 'networkidle'` block until they time out. Plain `page.screenshot()`
-  and `page.evaluate()` do **not** block during a stream (a default screenshot
-  mid-stream returns in ~120ms), so don't reach for `{ timeout: 0 }` hacks; just
-  never gate on the network settling. To pace during generation, wait on a DOM
-  condition or a bounded `waitForTimeout`.
-- **Advance on a real completion signal, not a fixed sleep.** Poll a DOM signal
-  that the stream has finished, with a **generous timeout** sized for a long
-  generation. The most portable signal is the **response text holding steady** —
-  the response container's text length is unchanged across a couple of
-  consecutive polls, having grown past its pre-send size. An in-progress
-  affordance clearing (a "Stop" / "Generating…" control disappearing) is a useful
-  secondary hint, but **don't rely on a send/submit button re-enabling**: it may
-  stay disabled in both the idle (empty input) and generating states, so it
-  can't distinguish them. This lets the full response stream into the recording,
-  then continues the moment it completes.
-- **Don't sit on a static screen.** A streaming reply is visible motion, so it
-  never looks frozen while generating. Once it settles, move on promptly rather
-  than lingering on a finished, motionless frame.
+- **Never wait for network-idle.** A streaming connection stays open, so
+  `waitForLoadState('networkidle')` and `waitUntil: 'networkidle'` block until
+  they time out. `page.screenshot()` and `page.evaluate()` don't block mid-stream.
+- **Advance on a real completion signal**, with a generous timeout. The most
+  portable one is the response container's text length holding steady across a
+  couple of polls, having grown past its pre-send size. An in-progress control
+  disappearing ("Stop", "Generating…") is a useful hint. Don't rely on a send
+  button re-enabling: it may stay disabled in both idle and generating states.
+- Once the stream settles, move on rather than lingering on a motionless frame.
 
-A stream is the ideal place for the **working→done colour pill** (see
-*Recording techniques*): show an in-progress pill anchored at the input while it
-generates, then flip it to a success pill on the completion signal.
+### Inspecting the video
 
-### Verifying without watching
-
-You can't casually watch a webm. The key-beat screenshots are the primary check.
-If you need to inspect the actual video content — for instance to confirm a
-screencast overlay, which beat screenshots don't capture — Playwright's bundled
-ffmpeg (`/opt/pw-browsers/ffmpeg-*/ffmpeg-linux`) decodes VP8 → PNG (it's
-webm-only but does decode). Extract a few frames and look:
+`page.screenshot()` captures the cursor (it's DOM) but **not** screencast
+overlays (they live in the video layer). To check an overlay, extract a frame
+with Playwright's bundled ffmpeg, which decodes the webm:
 
 ```bash
 FFM=$(ls /opt/pw-browsers/ffmpeg-*/ffmpeg-linux | head -1)
 "$FFM" -y -i clip.webm -ss 4 -frames:v 1 frame.png   # accurate seek: -ss AFTER -i
-"$FFM" -y -i clip.webm -update 1 last.png            # last frame (overwrites each frame)
 ```
 
-The build is `--disable-everything`, so the `select`/`fps` filters aren't
-available — seek with `-ss` (placed *after* `-i` for frame-accuracy) instead.
-
----
-
-## Summary of what makes this a demo
-
-- Confirmed outline up front, then a smooth uninterrupted performance.
-- A clean open that leads in with cursor motion, not a motionless hold.
-- Natural pacing, a visible synthetic cursor, small colour-coded labels only where they help, deliberate pauses at the beats that matter.
-- One clip or several, grouped by how the scenarios actually flow.
-- A finished `.webm` surfaced for sign-off — not a verdict, not a bug hunt.
+The build is `--disable-everything`, so filters like `select`/`fps` aren't
+available.

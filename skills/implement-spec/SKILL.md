@@ -20,10 +20,10 @@ Invoke the `/setup-worktree` skill to create an isolated worktree for this task.
 1.  **Read the Spec**: A GitHub issue or a file path.
 2.  **Understand Guardrails**: Pay close attention to the "Goals", "Non-Goals", and "API Design" sections. These are your acceptance criteria.
 3.  **Determine implementation approach**:
-    - **TDD** — if backend service files or utility functions are implemented. Follow [TDD guide](references/tdd.md).
+    - **TDD** — for any behaviour with logic. Follow [TDD guide](references/tdd.md).
     - **Figma-to-Code** — if the spec has a Figma References section. Follow [Figma-to-Code guide](references/figma-to-code.md).
 
-    *These are not mutually exclusive — a full-stack change follows both, each for its part of the work.*
+    *These are not mutually exclusive: UI built from a Figma design follows Figma-to-Code for how it looks and TDD for any logic in it.*
 
 ### 1b. Task List Creation
 After reading the spec, use whatever task/todo tool you have available to create todos that combine this skill's workflow steps with the concrete feature work items from the spec (endpoints, services, models, DTOs, components, pages — drawn from API Design, Goals, and architecture). Create every todo before writing any code.
@@ -51,7 +51,7 @@ Settle the shared dependencies before sub-agents begin work when independent str
 For each subagent, provide:
 - The path to the spec file so it can read the full context itself
 - The specific files/module it is responsible for — scoped so it does not overstep into another stream's files
-- The approach to follow: TDD (if it owns backend service/utility code) and Figma-to-Code (if the spec has Figma references). Pass the approach reference file(s) to the subagent so it can see how to go about it
+- The approach to follow: TDD (for any behaviour with logic) and Figma-to-Code (if the spec has Figma references). Pass the approach reference file(s) to the subagent so it can see how to go about it
 - A directive to implement the assigned stream itself — it must not delegate further or spawn its own subagents
 - A brief note on its role in the overall implementation (e.g. "you are implementing the dashboard page and its components")
 

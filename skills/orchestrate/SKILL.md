@@ -1,6 +1,6 @@
 ---
 name: orchestrate
-description: Runs an implementation issue set level by level. Starts a session per sub-issue, merges the levels in between, and stops at a checkpoint for the user's review.
+description: Runs an implementation breakdown level by level. Starts a session per sub-issue, merges the levels in between, and stops at a checkpoint for the user's review.
 disable-model-invocation: true
 ---
 

@@ -10,7 +10,7 @@ Different implementing agents pick up tasks split from a spec. Blockers get merg
 
 ## Inputs
 
-- The **spec** the work was split from, or the spec and the issue-set breakdown.
+- The **spec** the work was split from, or the spec and the implementation breakdown.
 - The **branch or set of merged changes** that make up the milestone work so far.
 - Which tasks are **done vs. remaining** — remaining tasks define what's out of scope for "left out".
 
@@ -25,7 +25,7 @@ This is **not** an adversarial look against all the work. The sessions have alre
 
 ## Process
 
-1. Read the spec (and the issue-set breakdown if provided); establish what "done so far" should cover and what the remaining tasks will cover.
+1. Read the spec (and the implementation breakdown if provided); establish what "done so far" should cover and what the remaining tasks will cover.
 2. Sweep the milestone changes (use Explore/review sub-agents in parallel across areas if the surface is large) with the four lenses above.
 3. Point out the findings to the user. Do not fix anything.
 4. Triage with the user. They decide how to go about them.
