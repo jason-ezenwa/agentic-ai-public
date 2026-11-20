@@ -83,7 +83,9 @@ Each entry is a clickable Markdown link to the user-provided URL with a short la
 
 ## Proposed Architecture
 **Diagram**: High-level architecture showing major components and data flow
-**Component Overview**: Table of components and the change expected in each
+**Program Design**:
+- **Tree**: For each new or restructured UI, the components nested as they render. For a new backend module, the module with its controllers, services and guards. Names only: no props, state or file paths.
+- **Changes**: Table of the areas outside those trees (existing code, migrations, config, packages) and the change in each.
 
 ---
 

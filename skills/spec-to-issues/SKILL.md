@@ -19,7 +19,7 @@ Identify the dependency order across all issues before producing anything, and a
 
 ## Proposal & Approval (required before any writes)
 
-After decomposing the spec and **before creating any GitHub issues**, present the proposed decomposition to the user and wait for explicit approval.
+After decomposing the spec and **before creating any GitHub issues**, present the proposed decomposition and wait for the user's explicit approval. Do not skip this even if the decomposition seems obvious. If they request changes, update it and re-propose. Once approved, carry out the write steps below.
 
 The proposal must include, for each planned issue:
 - Its dependency position, level, and title
@@ -32,10 +32,6 @@ Also surface:
 - Any requirements from the source spec you are deliberately excluding, and why
 - The source spec issue and the title of the hub issue (the implementation breakdown) that will be created
 - The **integration branch** all issue worktrees will branch off (propose `feat/<feature-slug>` derived from the spec slug; the user can override). This branch is the merge target for every issue PR — it is never merged into the default branch until QA has been done and the user explicitly triggers it.
-
-Wait for the user to give explicit approval. If they request changes, update the decomposition and re-propose. Do not skip this step even if the decomposition seems obvious.
-
-Once approved, carry out the write steps below.
 
 ## Step 1 — Create the implementation breakdown hub
 
